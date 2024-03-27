@@ -1,0 +1,42 @@
+
+<div id="content" style="z-index:1;">
+ <div class="d-sm-flex align-items-center">
+		<h1 class="ml-6 text-darkorange"></h1>
+		 <nav style="margin-left: 3rem;
+    						 height: 35px;
+    						 margin-top: 0.5rem;">
+				  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+				  </div>
+				</nav>
+	</div>
+	<div class="container-fluid" id="container-wrapper">
+		<div class="row mb-3">
+			<div class="col-12">
+					<div class="title">
+						<h4>HISTORICAL FLOW</h4>
+					</div>
+
+					<div id="flow-display">
+						<ul id="flow-list"></ul>
+						  <div  class="col-12 d-flex mb-2 h-40"> 
+						  <div class="col-3 d-flex p-0 "> 
+						    <button id='previous-day-button' class="btn btn-primary mr-2" onclick='changeDate(-1)'>&lt;</button>
+						  	<div id='date-input'></div>
+						  	<button id='next-day-button' class="btn btn-primary ml-2" onclick='changeDate(1)'>&gt;</button>
+						  </div>
+						  	<div class="col-md-4">
+									 <div style="width: 100%; height: 40px;">
+											<div class="form-group" id="notifcationContainer">
+												<div id="jqxNotification">
+													<div id="notificationContent"></div>
+												</div>
+											</div>
+									</div>
+								</div>
+							</div>
+						  	<div id="flow-grid"></div>
+			    </div>
+			</div>
+		</div>
+	</div>
+</div>

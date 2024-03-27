@@ -1,0 +1,23 @@
+
+
+create table cr_ravencoin (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
+create table cr_ravencoin_sequence (next_val bigint) ;
+
+
+create table cr_harmony (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
+create table cr_harmony_sequence (next_val bigint) ;
+
+
+create table cr_bitcoin (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
+create table cr_bitcoin_sequence (next_val bigint) ;
+
+
+create table cr_reef (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
+create table cr_reef_sequence (next_val bigint) ;
+
+
+create table cr_near (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
+create table cr_near_sequence (next_val bigint) ;
+
+
+
