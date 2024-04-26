@@ -58,7 +58,7 @@ function initiateFlow() {
 				+ "	</div>";
 	  $('#insert-row').append(insert_row);
 	  $("#date-input").jqxDateTimeInput({  theme:'dark', width: '100%', height: '40px' }); 
-	  var productSource = ["","BUND", "BOBL", "BUXL", "SHATZ", "OAT", "BTP", "EURIBOR", "TY"];
+	  var productSource = ["","BUND", "BOBL", "BUXL", "SHATZ","EURIBOR", "OAT", "BTP", "TY"];
 	  $("#productDropDownList").jqxDropDownList({ source: productSource, width: '100%', height: 40,  theme:'dark',});  
 		  $("#jqxNotification").jqxNotification({  height: 40, width: "100%",appendContainer: "#notifcationContainer",  opacity: 0.9,
            animationOpenDelay: 800, autoClose:true , autoCloseDelay: 1000,  template: 'info'
@@ -84,25 +84,28 @@ function initiateFlow() {
                     return 'title-color';
                 }
             }
-            const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '70%' :
-							    (hasEditPrivelege || hasDeletePrivelege) ? '80%' :
-							    '90%';
+            const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '80%' :
+							    (hasEditPrivelege || hasDeletePrivelege) ? '90%' :
+							    '100%';
 
-	       $("#flow-grid").jqxGrid(
+	     $("#flow-grid").jqxGrid(
 			            {
 			                width: '100%',
 			                source: dataAdapter,  
 			                theme:'dark',
 			                selectionmode: 'none',
 			                editmode: 'selectedrow',
-			                editable: true,
-			                autoheight: true,
+			          		editable: true,
+			              	autoheight: true,
+							showgroupsheader: false,
+							groupable: true,
+							groupsexpandedbydefault: true,
 			                columns: [ 
 			                	
-	                	  { text: 'id',editable:false, datafield: 'id', hidden: true},
-		                  { text: 'Product',editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass },
-		                  { text: 'Date', editable:false, datafield: 'flowDate', width: '10%',hidden:true, cellsformat: 'dd-MMM-yyyy',  cellclassname: cellclass },
-		                  { text: 'Flow',editable:true, datafield: 'flow', width: flowWidth,  cellclassname: cellclass },
+	                	  { text: 'id', editable:false, datafield: 'id', hidden: true},
+		                  { text: '', editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass, hidden: true },
+		                  { text: '', editable:false, datafield: 'flowDate', width: '10%',hidden:true, cellsformat: 'dd-MMM-yyyy',  cellclassname: cellclass },
+		                  { text: '', editable:true, datafield: 'flow', width: flowWidth,  cellclassname: cellclass },
 		                   
 		                  (hasEditPrivelege) ? { text: '',editable:false, datafield: 'Edit',width:'8.75%', filterable: false,  cellclassname: cellclass,cellsrenderer: function (row) {
    	    	 
@@ -138,8 +141,10 @@ function initiateFlow() {
 				          	  return '';
 				          	  }
 		                  }: null , 
-			                ]
+			                ],
+							 groups: ['product']
 			            });
+			           
 }
 
 function submitData(){
@@ -186,7 +191,7 @@ function submitData(){
 }
 function clearInput(){
 	$('#productDropDownList').val("");
-	$('#date-input').val("");
+	$('#date-input').jqxCalendar('setDate', new Date()); 
 	$('#flow-input').val("");
 }
 function fetchDataGrid(){
@@ -194,7 +199,7 @@ function fetchDataGrid(){
 				 delete source.localdata;   
 			     source.url=apiLiveFlowUrl+'/flow/getLiveOptionByDate/'+systemDate;
 			     var dataAdapter = new $.jqx.dataAdapter(source);
-			     $('#flow-grid').jqxGrid({source:dataAdapter});
+			     $('#flow-grid').jqxGrid({source:dataAdapter, groups: ['product']});
 			     
 }
  function Copy(row, event) {
@@ -216,7 +221,7 @@ function Delete(row, event) {
  	             delete source.localdata;   
 			     source.url=apiLiveFlowUrl+'/flow/getLiveOptionByDate/'+systemDate;
 			     var dataAdapter = new $.jqx.dataAdapter(source);
-			     $('#flow-grid').jqxGrid({source:dataAdapter});
+			      $('#flow-grid').jqxGrid({source:dataAdapter, groups: ['product']});
 			     
 			      $("#jqxNotification").jqxNotification({   template: 'error' });
 			      $("#notificationContent").html('Data has been deleted');
@@ -295,4 +300,5 @@ function Delete(row, event) {
 	    }
 	    return false;
     }
+
     

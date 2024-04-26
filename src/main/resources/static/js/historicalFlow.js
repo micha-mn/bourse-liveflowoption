@@ -54,24 +54,29 @@ function initiateHistoricalFlow() {
                     return 'title-color';
                 }
             }
-            const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '70%' :
-							    (hasEditPrivelege || hasDeletePrivelege) ? '80%' :
-							    '90%';
-	       $("#flow-grid").jqxGrid(
+              const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '80%' :
+							    (hasEditPrivelege || hasDeletePrivelege) ? '90%' :
+							    '100%';
+
+	     $("#flow-grid").jqxGrid(
 			            {
 			                width: '100%',
 			                source: dataAdapter,  
 			                theme:'dark',
 			                selectionmode: 'none',
 			                editmode: 'selectedrow',
-			                editable: true,
-			                autoheight: true,
+			          		editable: true,
+			              	autoheight: true,
+							showgroupsheader: false,
+							groupable: true,
+							groupsexpandedbydefault: true,
 			                columns: [ 
 			                	
-	                	  { text: 'id',editable:false, datafield: 'id', width: '8%',  hidden: true},
-		                  { text: 'Product',editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass },
-		                  { text: 'Date', editable:false, datafield: 'flowDate', width: '10%',hidden:true, cellsformat: 'dd-MMM-yyyy',  cellclassname: cellclass },
-		                  { text: 'Flow',editable:true, datafield: 'flow', width: flowWidth,  cellclassname: cellclass },
+	                	  { text: 'id', editable:false, datafield: 'id', hidden: true},
+		                  { text: '', editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass, hidden: true },
+		                  { text: '', editable:false, datafield: 'flowDate', width: '10%',hidden:true, cellsformat: 'dd-MMM-yyyy',  cellclassname: cellclass },
+		                  { text: '', editable:true, datafield: 'flow', width: flowWidth,  cellclassname: cellclass },
+		                   
 		                  (hasEditPrivelege) ? { text: '',editable:false, datafield: 'Edit',width:'8.75%', filterable: false,  cellclassname: cellclass,cellsrenderer: function (row) {
    	    	 
 						     var CheckifFlowNull=  $('#flow-grid').jqxGrid('getcellvalue', row, "flow");
@@ -82,7 +87,7 @@ function initiateHistoricalFlow() {
 				          	 else
 				          	  return '';
 				          	  }
-		                  }: null ,    
+		                  }: null ,  
 		                  (hasDeletePrivelege)?{ text: '',editable:false, datafield: 'Delete',width:'8.75%',  cellclassname: cellclass ,cellsrenderer: function (row) {
 		                	     // open the popup window when the user clicks a button.
 		                	     
@@ -95,7 +100,7 @@ function initiateHistoricalFlow() {
 				          	  return '';
 				          	  }
 		                  }: null ,  
-		                     (hasRoleSuperAdmin) ? { text: '',editable:false, datafield: 'copy',width:'2.5%', filterable: false,  cellclassname: cellclass,cellsrenderer: function (row) {
+		                   (hasRoleSuperAdmin) ? { text: '',editable:false, datafield: 'copy',width:'2.5%', filterable: false,  cellclassname: cellclass,cellsrenderer: function (row) {
    	    	 
 						     var CheckifFlowNull=  $('#flow-grid').jqxGrid('getcellvalue', row, "flow");
 				          	 if (CheckifFlowNull!=null)
@@ -105,9 +110,11 @@ function initiateHistoricalFlow() {
 				          	 else
 				          	  return '';
 				          	  }
-		                  }: null ,
-			                ]
+		                  }: null , 
+			                ],
+							 groups: ['product']
 			            });
+			           
 			            var today = new Date();
 						var year = today.getFullYear();
 						var month = String(today.getMonth() + 1).padStart(2, '0');
@@ -140,8 +147,8 @@ function fetchDataGrid(date){
 				 delete source.localdata;   
 			     source.url=apiLiveFlowUrl+'/flow/getLiveOptionByDate/'+date;
 			     var dataAdapter = new $.jqx.dataAdapter(source);
-			     $('#flow-grid').jqxGrid({source:dataAdapter});
-			     
+			     $('#flow-grid').jqxGrid({source:dataAdapter, groups: ['product']});
+
 }
 
 function Delete(row, event) {
@@ -158,7 +165,8 @@ function Delete(row, event) {
  	             delete source.localdata;   
 			     source.url=apiLiveFlowUrl+'/flow/getLiveOptionByDate/'+systemDate;
 			     var dataAdapter = new $.jqx.dataAdapter(source);
-			     $('#flow-grid').jqxGrid({source:dataAdapter});
+			     $('#flow-grid').jqxGrid({source:dataAdapter, groups: ['product']});
+
 			     
 			      $("#jqxNotification").jqxNotification({   template: 'error' });
 			      $("#notificationContent").html('Data has been deleted');

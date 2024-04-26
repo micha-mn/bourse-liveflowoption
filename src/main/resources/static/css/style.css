@@ -6,7 +6,7 @@ div#content {
     border: #464D5C;
     width: 100%;
     overflow-x: hidden;
-    min-height: 650px;
+    height: 650px;
 }
 select {
     border-radius: 7px; /* add a round shape to the border of the select element */
@@ -214,3 +214,32 @@ option {
 .required{
    border: 1px solid #ed657d;
 }  
+.jqx-widget-header.jqx-widget-header-dark.jqx-grid-header.jqx-grid-header-dark {
+    height: 0px !important;
+}
+.jqx-grid-group-cell, .jqx-grid-empty-cell {
+    border-style: solid;
+    border-width: 0px 0px 1px 0px;
+    white-space: nowrap;
+    font-weight: normal;
+    border-color: #354a75 !important;
+}
+.jqx-grid-group-cell {
+    overflow: hidden;
+    position: absolute !important;
+    height: 100%;
+    background: #272e48;
+}
+.jqx-grid-groups-row-dark > span {
+    padding-left: 0;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.title-color {
+    color: white !important;
+    font-weight: bold !important;
+    background-color: #354a76 !important;
+}
+.jqx-fill-state-hover-dark {
+   font-weight: normal  !important;
+}

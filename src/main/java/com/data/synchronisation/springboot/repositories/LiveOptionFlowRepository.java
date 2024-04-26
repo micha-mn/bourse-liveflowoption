@@ -9,15 +9,7 @@ import com.data.synchronisation.springboot.domain.LiveOptionFlow;
 public interface LiveOptionFlowRepository extends JpaRepository<LiveOptionFlow, Long> {
 	
 	 
-	   @Query(value = "\r\n"
-	   		+ "select tab.product, \r\n"
-	   		+ "  tab.id,\r\n"
-	   		+ "   CASE \r\n"
-	   		+ "        WHEN tab.flow_date = '3000-01-01 00:00:00' THEN NULL\r\n"
-	   		+ "        ELSE tab.flow_date\r\n"
-	   		+ "    END as flow_date ,\r\n"
-	   		+ "  tab.flow from (\r\n"
-	   		+ "SELECT \r\n"
+	   @Query(value = "SELECT \r\n"
 	   		+ "  a.product, \r\n"
 	   		+ "  a.id,\r\n"
 	   		+ "  a.flow_date,\r\n"
@@ -36,20 +28,13 @@ public interface LiveOptionFlowRepository extends JpaRepository<LiveOptionFlow, 
 	   		+ "WHERE\r\n"
 	   		+ "  flow_date = :date\r\n"
 	   		+ "  OR a.flow IS NULL\r\n"
-	   		+ "ORDER BY FIELD(a.product,  'BUND', 'BOBL', 'BUXL', 'SHATZ', 'OAT', 'BTP', 'EURIBOR', 'TY'), a.flow_date DESC) tab where count_by_product>1;"
+	   		+ "ORDER BY FIELD(a.product,  'BUND', 'BOBL', 'BUXL', 'SHATZ', 'OAT', 'BTP', 'EURIBOR', 'TY'), a.flow_date DESC;"
 	   		,
 				      nativeQuery = true)
    List<LiveOptionFlow> findLiveOptionFlowByFlowDate(@Param("date") String date);
    
  	 
-   @Query(value = "select tab.product, \r\n"
-   		+ "  tab.id,\r\n"
-   		+ "   CASE \r\n"
-   		+ "        WHEN tab.flow_date = '3000-01-01 00:00:00' THEN NULL\r\n"
-   		+ "        ELSE tab.flow_date\r\n"
-   		+ "    END as flow_date ,\r\n"
-   		+ "  tab.flow from (\r\n"
-   		+ "SELECT \r\n"
+   @Query(value =  "SELECT \r\n"
    		+ "  a.product, \r\n"
    		+ "  a.id,\r\n"
    		+ "  a.flow_date,\r\n"
@@ -72,7 +57,7 @@ public interface LiveOptionFlowRepository extends JpaRepository<LiveOptionFlow, 
    		+ "  OR DATE_FORMAT(a.flow_date, '%Y-%m-%d') LIKE CONCAT('%', :value, '%')\r\n"
    		+ "  OR a.flow LIKE CONCAT('%', :value, '%')\r\n"
    		+ "  OR a.flow IS NULL\r\n"
-   		+ "ORDER BY FIELD(a.product,  'BUND', 'BOBL', 'BUXL', 'SHATZ', 'OAT', 'BTP', 'EURIBOR', 'TY'), a.flow_date DESC) tab where count_by_product>1;\r\n"
+   		+ "ORDER BY FIELD(a.product,  'BUND', 'BOBL', 'BUXL', 'SHATZ', 'OAT', 'BTP', 'EURIBOR', 'TY'), a.flow_date DESC;\r\n"
    		,
 			      nativeQuery = true)
    List<LiveOptionFlow> findAllNewsByDescription(@Param("value") String value);

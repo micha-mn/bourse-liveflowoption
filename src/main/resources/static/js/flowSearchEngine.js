@@ -19,7 +19,7 @@ function initiateHistoricalFlow() {
 	  $('#nav-tab').append(menu);
 	}
 	
-	   var productSource = ["","BUND", "BOBL", "BUXL", "SHATZ", "OAT", "BTP", "EURIBOR", "TY"];
+	   var productSource = ["","BUND", "BOBL", "BUXL", "SHATZ", "EURIBOR", "OAT", "BTP", "TY"];
 	  $("#productDropDownList").jqxDropDownList({ source: productSource, width: '100%', height: 40,  theme:'dark',});  
 	  $("#jqxNotification").jqxNotification({  height: 40, width: "100%",appendContainer: "#notifcationContainer",  opacity: 0.9,
            animationOpenDelay: 800, autoClose:true , autoCloseDelay: 1000,  template: 'info'
@@ -44,22 +44,25 @@ function initiateHistoricalFlow() {
                     return 'title-color';
                 }
             }
-              const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '60%' :
-							    (hasEditPrivelege || hasDeletePrivelege) ? '70%' :
-							    '80%';
+              const flowWidth =	(hasEditPrivelege && hasDeletePrivelege) ? '70%' :
+							    (hasEditPrivelege || hasDeletePrivelege) ? '80%' :
+							    '90%';
 	        $("#flow-grid").jqxGrid(
 			            {
-			                width: '100%',
+			               width: '100%',
 			                source: dataAdapter,  
 			                theme:'dark',
 			                selectionmode: 'none',
 			                editmode: 'selectedrow',
-			                editable: true,
-			                autoheight: true,
+			          		editable: true,
+			              	autoheight: true,
+							showgroupsheader: false,
+							groupable: true,
+							groupsexpandedbydefault: true,
 			                columns: [ 
 			                	
 	                	  { text: 'id',editable:false, datafield: 'id', width: '8%',  hidden: true},
-		                  { text: 'Product',editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass },
+		                  { text: 'Product',editable:false, datafield: 'product', width: '10%',  cellclassname: cellclass ,  hidden: true},
 		                  { text: 'Date', editable:false, datafield: 'flowDate', width: '10%', cellsformat: 'dd-MMM-yyyy',  cellclassname: cellclass },
 		                  { text: 'Flow',editable:true, datafield: 'flow', width: flowWidth,  cellclassname: cellclass },
 		                  
@@ -97,7 +100,8 @@ function initiateHistoricalFlow() {
 				          	  return '';
 				          	  }
 		                  }: null ,   
-			                ]
+			                ],
+			                 groups: ['product']
 			            });
 			       
 }
@@ -133,7 +137,7 @@ function Delete(row, event) {
 	     source.url=apiLiveFlowUrl+'/flow/getLiveOptionFlowDataByValueAndProduct/'+value+'/'+dropDownValue;
 	     
      var dataAdapter = new $.jqx.dataAdapter(source);
-     $('#flow-grid').jqxGrid({source:dataAdapter});
+     $('#flow-grid').jqxGrid({source:dataAdapter, groups: ['product']});
 	    
 			     
 }
