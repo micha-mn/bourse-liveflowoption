@@ -119,4 +119,12 @@ public class CryptoAnalyseService {
 	       return true;
 	}
 	
+	public boolean scheduledServiceSynchronization(List<DataDTO> lst) {
+		
+		    
+	       return true;
+	}
+	
+	
+	
 }
