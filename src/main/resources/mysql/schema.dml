@@ -19,5 +19,41 @@ create table cr_reef_sequence (next_val bigint) ;
 create table cr_near (id bigint not null, refer_date DATETIME, value varchar(255), primary key (id)) ;
 create table cr_near_sequence (next_val bigint) ;
 
+CREATE TABLE cr_ethfi (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+create table cr_ethfi_seq (next_val bigint);
+
+
+CREATE TABLE cr_ena (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+create table cr_ena_seq (next_val bigint);
+
+
+CREATE TABLE cr_w (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+create table cr_w_seq (next_val bigint);
+
+
+CREATE TABLE cr_doge (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_doge_seq (next_val bigint);
+
 
 

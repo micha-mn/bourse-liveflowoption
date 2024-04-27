@@ -4,7 +4,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.data.synchronisation.springboot.data.dto.DataDTO;
+import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.enums.TableNameEnum;
+import com.data.synchronisation.springboot.domain.entity.Doge;
+import com.data.synchronisation.springboot.domain.entity.Ena;
+import com.data.synchronisation.springboot.domain.entity.EthFi;
+import com.data.synchronisation.springboot.domain.entity.W;
+import com.data.synchronisation.springboot.repositories.DogeRepository;
+import com.data.synchronisation.springboot.repositories.EnaRepository;
+import com.data.synchronisation.springboot.repositories.EthFiRepository;
+import com.data.synchronisation.springboot.repositories.WRepository;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -26,7 +35,22 @@ public class CryptoAnalyseService {
 	
 	@PersistenceContext
     private EntityManager entityManager;
-	 
+	private EthFiRepository ethFiRepository;
+	private EnaRepository enaRepository;
+	private WRepository wRepository;
+	private DogeRepository dogeRepository;
+	
+	public CryptoAnalyseService(EthFiRepository ethFiRepository,
+			                    EnaRepository enaRepository,
+			                    WRepository wRepository,
+			                    DogeRepository dogeRepository) {
+		this.ethFiRepository = ethFiRepository;
+		this.enaRepository   = enaRepository;
+		this.wRepository = wRepository;
+		this.dogeRepository = dogeRepository;
+	}
+	
+	
 	 @Transactional
 	    public boolean insertIntoTable(DataDTO dataDTO) {
 	        String sequenceQuery = "select next_val from cr_" + dataDTO.getTableName() + "_sequence";
@@ -119,10 +143,36 @@ public class CryptoAnalyseService {
 	       return true;
 	}
 	
-	public boolean scheduledServiceSynchronization(List<DataDTO> lst) {
-		
-		    
+	public boolean scheduledServiceDataSynchronization(PriceCryptoRespDTO data) {
+		   buildEntityObjectAndInsert(data);
 	       return true;
+	}
+	
+	public void buildEntityObjectAndInsert(PriceCryptoRespDTO data) {
+		if(data.getSymbol().equalsIgnoreCase("ETHFIUSDT")) {
+			EthFi ethFi = EthFi.builder().referDate(LocalDateTime.now())
+					.value(data.getPrice())
+					.build();
+			ethFiRepository.save(ethFi);
+		}
+		if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
+			Ena ena = Ena.builder().referDate(LocalDateTime.now())
+					.value(data.getPrice())
+					.build();
+			enaRepository.save(ena);
+		}
+		if(data.getSymbol().equalsIgnoreCase("WUSDT")) {
+			W w = W.builder().referDate(LocalDateTime.now())
+					.value(data.getPrice())
+					.build();
+			wRepository.save(w);
+		}
+		if(data.getSymbol().equalsIgnoreCase("DOGEUSDT")) {
+			Doge doge = Doge.builder().referDate(LocalDateTime.now())
+					.value(data.getPrice())
+					.build();
+			dogeRepository.save(doge);
+		}
 	}
 	
 	
