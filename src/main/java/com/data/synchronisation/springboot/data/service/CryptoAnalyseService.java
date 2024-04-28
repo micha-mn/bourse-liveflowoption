@@ -143,35 +143,39 @@ public class CryptoAnalyseService {
 	       return true;
 	}
 	
-	public boolean scheduledServiceDataSynchronization(PriceCryptoRespDTO data) {
-		   buildEntityObjectAndInsert(data);
+	public boolean scheduledServiceDataSynchronization(PriceCryptoRespDTO[] dataLst) {
+		   buildEntityObjectAndInsert(dataLst);
 	       return true;
 	}
 	
-	public void buildEntityObjectAndInsert(PriceCryptoRespDTO data) {
-		if(data.getSymbol().equalsIgnoreCase("ETHFIUSDT")) {
-			EthFi ethFi = EthFi.builder().referDate(LocalDateTime.now())
-					.value(data.getPrice())
-					.build();
-			ethFiRepository.save(ethFi);
-		}
-		if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
-			Ena ena = Ena.builder().referDate(LocalDateTime.now())
-					.value(data.getPrice())
-					.build();
-			enaRepository.save(ena);
-		}
-		if(data.getSymbol().equalsIgnoreCase("WUSDT")) {
-			W w = W.builder().referDate(LocalDateTime.now())
-					.value(data.getPrice())
-					.build();
-			wRepository.save(w);
-		}
-		if(data.getSymbol().equalsIgnoreCase("DOGEUSDT")) {
-			Doge doge = Doge.builder().referDate(LocalDateTime.now())
-					.value(data.getPrice())
-					.build();
-			dogeRepository.save(doge);
+	public void buildEntityObjectAndInsert(PriceCryptoRespDTO[] dataLst) {
+		PriceCryptoRespDTO data = PriceCryptoRespDTO.builder().build();
+		for(int i =0;i<dataLst.length; i++) {
+			data = dataLst[i];
+			if(data.getSymbol().equalsIgnoreCase("ETHFIUSDT")) {
+				EthFi ethFi = EthFi.builder().referDate(LocalDateTime.now())
+						.value(data.getPrice())
+						.build();
+				ethFiRepository.save(ethFi);
+			}else
+			if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
+				Ena ena = Ena.builder().referDate(LocalDateTime.now())
+						.value(data.getPrice())
+						.build();
+				enaRepository.save(ena);
+			}else
+			if(data.getSymbol().equalsIgnoreCase("WUSDT")) {
+				W w = W.builder().referDate(LocalDateTime.now())
+						.value(data.getPrice())
+						.build();
+				wRepository.save(w);
+			}else
+			if(data.getSymbol().equalsIgnoreCase("DOGEUSDT")) {
+				Doge doge = Doge.builder().referDate(LocalDateTime.now())
+						.value(data.getPrice())
+						.build();
+				dogeRepository.save(doge);
+			}
 		}
 	}
 	
