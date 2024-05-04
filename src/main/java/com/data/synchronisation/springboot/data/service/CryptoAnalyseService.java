@@ -1,33 +1,56 @@
 package com.data.synchronisation.springboot.data.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.data.synchronisation.springboot.data.dto.DataDTO;
-import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
-import com.data.synchronisation.springboot.data.enums.TableNameEnum;
-import com.data.synchronisation.springboot.domain.entity.Doge;
-import com.data.synchronisation.springboot.domain.entity.Ena;
-import com.data.synchronisation.springboot.domain.entity.EthFi;
-import com.data.synchronisation.springboot.domain.entity.W;
-import com.data.synchronisation.springboot.repositories.DogeRepository;
-import com.data.synchronisation.springboot.repositories.EnaRepository;
-import com.data.synchronisation.springboot.repositories.EthFiRepository;
-import com.data.synchronisation.springboot.repositories.WRepository;
-
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import java.util.Locale;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
+import com.data.synchronisation.springboot.data.dto.DataDTO;
+import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
+import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
+import com.data.synchronisation.springboot.data.enums.TableNameEnum;
+import com.data.synchronisation.springboot.domain.entity.Bnb;
+import com.data.synchronisation.springboot.domain.entity.Btc;
+import com.data.synchronisation.springboot.domain.entity.Doge;
+import com.data.synchronisation.springboot.domain.entity.Ena;
+import com.data.synchronisation.springboot.domain.entity.EnaInfo;
+import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
+import com.data.synchronisation.springboot.domain.entity.Eth;
+import com.data.synchronisation.springboot.domain.entity.EthFi;
+import com.data.synchronisation.springboot.domain.entity.Floki;
+import com.data.synchronisation.springboot.domain.entity.Pepe;
+import com.data.synchronisation.springboot.domain.entity.Saga;
+import com.data.synchronisation.springboot.domain.entity.W;
+import com.data.synchronisation.springboot.domain.entity.WInfo;
+import com.data.synchronisation.springboot.domain.entity.WTradeInfo;
+import com.data.synchronisation.springboot.repositories.BnbRepository;
+import com.data.synchronisation.springboot.repositories.BtcRepository;
+import com.data.synchronisation.springboot.repositories.DogeRepository;
+import com.data.synchronisation.springboot.repositories.EnaInfoRepository;
+import com.data.synchronisation.springboot.repositories.EnaRepository;
+import com.data.synchronisation.springboot.repositories.EnaTradeInfoRepository;
+import com.data.synchronisation.springboot.repositories.EthFiRepository;
+import com.data.synchronisation.springboot.repositories.EthRepository;
+import com.data.synchronisation.springboot.repositories.FlokiRepository;
+import com.data.synchronisation.springboot.repositories.PepeRepository;
+import com.data.synchronisation.springboot.repositories.SagaRepository;
+import com.data.synchronisation.springboot.repositories.WInfoRepository;
+import com.data.synchronisation.springboot.repositories.WRepository;
+import com.data.synchronisation.springboot.repositories.WTradeInfoRepository;
 
 
 @Service
@@ -39,15 +62,49 @@ public class CryptoAnalyseService {
 	private EnaRepository enaRepository;
 	private WRepository wRepository;
 	private DogeRepository dogeRepository;
+	private SagaRepository sagaRepository;
+	private BtcRepository btcRepository;
+	private BnbRepository bnbRepository;
+	private EthRepository ethRepository;
+	private PepeRepository pepeRepository;
+	private FlokiRepository flokiRepository;
+	private EnaInfoRepository enaInfoRepository;
+	private WInfoRepository wInfoRepository;
+	private EnaTradeInfoRepository enaTradeInfoRepository;
+	private WTradeInfoRepository  wTradeInfoRepository;
+	
+	
+
 	
 	public CryptoAnalyseService(EthFiRepository ethFiRepository,
 			                    EnaRepository enaRepository,
 			                    WRepository wRepository,
-			                    DogeRepository dogeRepository) {
-		this.ethFiRepository = ethFiRepository;
-		this.enaRepository   = enaRepository;
-		this.wRepository = wRepository;
-		this.dogeRepository = dogeRepository;
+			                    DogeRepository dogeRepository,
+			                    SagaRepository sagaRepository,
+			                    BtcRepository btcRepository,
+			                    BnbRepository bnbRepository,
+			                    EthRepository ethRepository,
+			                    PepeRepository pepeRepository,
+			                    FlokiRepository flokiRepository,
+			                    EnaInfoRepository enaInfoRepository,
+			                    WInfoRepository wInfoRepository,
+			                    EnaTradeInfoRepository enaTradeInfoRepository,
+			                    WTradeInfoRepository  wTradeInfoRepository) {
+		
+		this.ethFiRepository            = ethFiRepository;
+		this.enaRepository              = enaRepository;
+		this.wRepository                = wRepository;
+		this.dogeRepository             = dogeRepository;
+		this.sagaRepository             = sagaRepository;
+		this.btcRepository              = btcRepository;
+		this.bnbRepository              = bnbRepository;
+		this.ethRepository              = ethRepository;
+		this.pepeRepository             = pepeRepository;
+		this.flokiRepository            = flokiRepository;
+		this.enaInfoRepository          = enaInfoRepository;
+		this.wInfoRepository            = wInfoRepository;
+		this.enaTradeInfoRepository     = enaTradeInfoRepository;
+		this.wTradeInfoRepository       = wTradeInfoRepository;
 	}
 	
 	
@@ -175,10 +232,170 @@ public class CryptoAnalyseService {
 						.value(data.getPrice())
 						.build();
 				dogeRepository.save(doge);
-			}
+			}else
+				if(data.getSymbol().equalsIgnoreCase("SAGAUSDT")) {
+					Saga saga = Saga.builder().referDate(LocalDateTime.now())
+							.value(data.getPrice())
+							.build();
+					sagaRepository.save(saga);
+				}else
+					if(data.getSymbol().equalsIgnoreCase("BTCUSDT")) {
+						Btc btc = Btc.builder().referDate(LocalDateTime.now())
+								.value(data.getPrice())
+								.build();
+						btcRepository.save(btc);
+					}
+					else
+						if(data.getSymbol().equalsIgnoreCase("BNBUSDT")) {
+							Bnb bnb = Bnb.builder().referDate(LocalDateTime.now())
+									.value(data.getPrice())
+									.build();
+							bnbRepository.save(bnb);
+						}else
+							if(data.getSymbol().equalsIgnoreCase("ETHUSDT")) {
+								Eth eth = Eth.builder().referDate(LocalDateTime.now())
+										.value(data.getPrice())
+										.build();
+								ethRepository.save(eth);
+							}else
+								if(data.getSymbol().equalsIgnoreCase("PEPEUSDT")) {
+									Pepe pepe = Pepe.builder().referDate(LocalDateTime.now())
+											.value(data.getPrice())
+											.build();
+									pepeRepository.save(pepe);
+								}else
+									if(data.getSymbol().equalsIgnoreCase("FLOKIUSDT")) {
+										Floki floki = Floki.builder().referDate(LocalDateTime.now())
+												.value(data.getPrice())
+												.build();
+										flokiRepository.save(floki);
+									}
+		}
+	}
+	
+	public void saveCurrencyInfo(CurrencyInfoDTO[] dataLst) {
+		EnaInfo enaInfo = EnaInfo.builder().build();
+		WInfo   wInfo = WInfo.builder().build();
+		for(int i=0;i<dataLst.length;i++) {
+			
+		if(dataLst[i].getId().equalsIgnoreCase("ethena")) {
+			enaInfo = buildEnaInfoEntity(dataLst[i]);
+			enaInfoRepository.save(enaInfo);
+		}else
+			if(dataLst[i].getId().equalsIgnoreCase("wormhole")) {
+			   wInfo = buildWInfoEntity(dataLst[i]);
+			   wInfoRepository.save(wInfo);
+		}
+		
+		
 		}
 	}
 	
 	
+	public EnaInfo buildEnaInfoEntity(CurrencyInfoDTO data) {
+		EnaInfo enaInfo = EnaInfo.builder().build();
+		enaInfo = EnaInfo.builder()
+				.id(data.getId())
+				.circulatingSupply(data.getCirculatingSupply())
+				.fullyDilutedMarketCap(data.getFullyDilutedMarketCap())
+				.high24h(data.getHigh24h())
+				.low24h(data.getLow24h())
+				.marketCap(data.getMarketCap())
+				.marketCapChange24h(data.getMarketCapChange24h())
+				.marketCapChangePercentage24h(data.getMarketCapChangePercentage24h())
+				.name(data.getName())
+				.priceChange24h(data.getPriceChange24h())
+				.priceChangePercentage24h(data.getPriceChangePercentage24h())
+				.referDate(data.getReferDate())
+				.symbol(data.getSymbol())
+				.totalVolume(data.getTotalVolume())
+				.build();
+		return enaInfo;
+	}
+	
+	public WInfo buildWInfoEntity(CurrencyInfoDTO data) {
+		WInfo wInfo = WInfo.builder().build();
+		wInfo = WInfo.builder()
+				.id(data.getId())
+				.circulatingSupply(data.getCirculatingSupply())
+				.fullyDilutedMarketCap(data.getFullyDilutedMarketCap())
+				.high24h(data.getHigh24h())
+				.low24h(data.getLow24h())
+				.marketCap(data.getMarketCap())
+				.marketCapChange24h(data.getMarketCapChange24h())
+				.marketCapChangePercentage24h(data.getMarketCapChangePercentage24h())
+				.name(data.getName())
+				.priceChange24h(data.getPriceChange24h())
+				.priceChangePercentage24h(data.getPriceChangePercentage24h())
+				.referDate(data.getReferDate())
+				.symbol(data.getSymbol())
+				.totalVolume(data.getTotalVolume())
+				.build();
+		return wInfo;
+		
+	}
+	
+	public void saveTradeInfo(TradeInfoDTO[] dataLst,String currrency) {
+		
+		
+		if(currrency.equalsIgnoreCase("ENA")) {
+			EnaTradeInfo enaTradeInfo = EnaTradeInfo.builder().build();
+			List<EnaTradeInfo> enaTradeInfoLst = new ArrayList<EnaTradeInfo>();
+			for(int i=0;i<dataLst.length;i++) {
+				enaTradeInfo = buildEnaTradeInfoEntity(dataLst[i]);
+				enaTradeInfoLst.add(enaTradeInfo);
+			}
+			enaTradeInfoRepository.saveAll(enaTradeInfoLst);
+		}
+	     else
+			if(currrency.equalsIgnoreCase("W")) {
+				WTradeInfo   wTradeInfo = WTradeInfo.builder().build();
+				List<WTradeInfo> wTradeInfoLst = new ArrayList<WTradeInfo>();
+				for(int i=0;i<dataLst.length;i++) {
+					wTradeInfo = buildWTradeInfoEntity(dataLst[i]);
+					wTradeInfoLst.add(wTradeInfo);
+				}
+				wTradeInfoRepository.saveAll(wTradeInfoLst);
+		} 
+	}
+	
+	public EnaTradeInfo buildEnaTradeInfoEntity(TradeInfoDTO data) {
+		long test_timestamp = Long.valueOf(data.getTime());
+		LocalDateTime triggerTime =
+		        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
+		                                TimeZone.getDefault().toZoneId()); 
+		
+		EnaTradeInfo enaTradeInfo = EnaTradeInfo.builder().build();
+		enaTradeInfo = EnaTradeInfo.builder()
+				.id(data.getId())
+				.isBestMatch(data.getIsBestMatch())
+				.isBuyerMaker(data.isBuyerMaker())
+				.price(data.getPrice())
+				.qty(data.getQty())
+				.quoteQty(data.getQuoteQty())
+				.time(triggerTime)
+				.build();
+		return enaTradeInfo;
+	}
+	
+	public WTradeInfo buildWTradeInfoEntity(TradeInfoDTO data) {
+		
+		long test_timestamp = Long.valueOf(data.getTime());
+		LocalDateTime triggerTime =
+		        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
+		                                TimeZone.getDefault().toZoneId()); 
+		
+		WTradeInfo wTradeInfo = WTradeInfo.builder().build();
+		wTradeInfo = WTradeInfo.builder()
+				.id(data.getId())
+				.isBestMatch(data.getIsBestMatch())
+				.isBuyerMaker(data.isBuyerMaker())
+				.price(data.getPrice())
+				.qty(data.getQty())
+				.quoteQty(data.getQuoteQty())
+				.time(triggerTime)
+				.build();
+		return wTradeInfo;
+	}
 	
 }

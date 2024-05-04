@@ -55,5 +55,198 @@ CREATE TABLE cr_doge (
 
 create table cr_doge_seq (next_val bigint);
 
+/* ----------- */
+
+CREATE TABLE cr_saga (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_saga_seq (next_val bigint);
+
+CREATE TABLE cr_btc (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_btc_seq (next_val bigint);
+
+CREATE TABLE cr_bnb (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_bnb_seq (next_val bigint);
+
+CREATE TABLE cr_eth (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_eth_seq (next_val bigint);
+
+CREATE TABLE cr_pepe (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_pepe_seq (next_val bigint);
+
+CREATE TABLE cr_floki (
+  id bigint NOT NULL,
+  refer_date datetime DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table cr_floki_seq (next_val bigint);
+
+CREATE TABLE `cr_ena_info` (
+  `id1` bigint NOT NULL,
+  `ID` varchar(1000) ,
+  `SYMBOL` varchar(1000),
+  `NAME` varchar(1000) ,
+  `MARKET_CAP` varchar(1000) ,
+  `FULLY_DILUTED_VALUATION` varchar(1000) ,
+  `TOTAL_VOLUME` varchar(1000) ,
+  `HIGH_24H` varchar(1000) ,
+  `LOW_24H` varchar(1000) ,
+  `MARKET_CAP_CHANGE_24H` varchar(1000) ,
+  `MARKET_CAP_CHANGE_PERCENTAGE_24H` varchar(1000) ,
+  `PRICE_CHANGE_24H` varchar(1000) ,
+  `PRICE_CHANGE_PERCENTAGE_24H` varchar(1000) ,
+  `CIRCULATING_SUPPLY` varchar(1000) ,
+  `TOTAL_SUPPLY` varchar(1000) ,
+  `refer_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table CR_ENA_INFO_SEQ (next_val bigint);
+
+CREATE TABLE `cr_w_info` (
+  `id1` bigint NOT NULL,
+  `ID` varchar(1000) ,
+  `SYMBOL` varchar(1000),
+  `NAME` varchar(1000) ,
+  `MARKET_CAP` varchar(1000) ,
+  `FULLY_DILUTED_VALUATION` varchar(1000) ,
+  `TOTAL_VOLUME` varchar(1000) ,
+  `HIGH_24H` varchar(1000) ,
+  `LOW_24H` varchar(1000) ,
+  `MARKET_CAP_CHANGE_24H` varchar(1000) ,
+  `MARKET_CAP_CHANGE_PERCENTAGE_24H` varchar(1000) ,
+  `PRICE_CHANGE_24H` varchar(1000) ,
+  `PRICE_CHANGE_PERCENTAGE_24H` varchar(1000) ,
+  `CIRCULATING_SUPPLY` varchar(1000) ,
+  `TOTAL_SUPPLY` varchar(1000) ,
+  `refer_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table CR_W_INFO_SEQ (next_val bigint);
 
 
+ CREATE TABLE `cr_ena_trade_info` (
+  `id1` bigint NOT NULL,
+  `id` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `price` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `qty` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `QUOTE_QTY` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `time` datetime DEFAULT NULL,
+  `IS_BUYER_MAKER` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `IS_BEST_MATCH` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `refer_date` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+create table CR_ENA_TRADE_INFO_SEQ (next_val bigint);
+
+CREATE TABLE `CR_W_TRADE_INFO` (
+  `id1` bigint NOT NULL,
+  `id` varchar(1000) ,
+  `price` varchar(1000),
+  `qty` varchar(1000) ,
+  `QUOTE_QTY` varchar(1000) ,
+  `time` datetime,
+  `IS_BUYER_MAKER` varchar(1000) ,
+  `IS_BEST_MATCH` varchar(1000) ,
+  `refer_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id1`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+ create table CR_W_TRADE_INFO_SEQ (next_val bigint);   
+
+CREATE TABLE cr_ena_trade_analysis (
+		  id bigint NOT NULL,
+		  BUY_QTY varchar(1000),
+          SELL_QTY varchar(1000),
+          DIFF_SELL_BUY_QTY varchar(1000),
+          FROM_TIME datetime,
+          TO_TIME   datetime,
+		  PRIMARY KEY (id)
+);
+ create table cr_ena_trade_analysis_SEQ (next_val bigint); 
+
+CREATE TABLE cr_w_trade_analysis (
+		  id bigint NOT NULL,
+		  BUY_QTY varchar(1000),
+          SELL_QTY varchar(1000),
+          DIFF_SELL_BUY_QTY varchar(1000),
+          FROM_TIME datetime,
+          TO_TIME   datetime,
+		  PRIMARY KEY (id)
+);
+ create table cr_w_trade_analysis_SEQ (next_val bigint); 
+ 
+ 
+ 
+ 
+ DELIMITER $$
+CREATE PROCEDURE bourse.cr_analyse_trade_infor(IN currencyCode VARCHAR(255))
+       BEGIN
+        if currencyCode = 'ENA' then
+         Insert into cr_ena_trade_analysis 
+         select  (select next_val+1 from cr_ena_trade_analysis_SEQ) as id,
+                 (select sum(quote_qty) from CR_ENA_TRADE_INFO where IS_BUYER_MAKER = 0) buy_QT,
+                 (select  sum(quote_qty) from CR_ENA_TRADE_INFO where IS_BUYER_MAKER = 1) sell_qty,
+                   (select sum(quote_qty) from CR_ENA_TRADE_INFO where IS_BUYER_MAKER = 0)
+                 - (select  sum(quote_qty) from CR_ENA_TRADE_INFO where IS_BUYER_MAKER = 1) as difference_sell_buy,
+				 min(time) from_time,
+                 max(time) to_time
+                from bourse.CR_ENA_TRADE_INFO;
+         update cr_ena_trade_analysis_SEQ
+        set next_val = next_val+1;
+        truncate bourse.CR_ENA_TRADE_INFO;
+        end if ;
+        
+        if currencyCode = 'W' then /*changed later to be dynamic*/
+         Insert into cr_w_trade_analysis 
+         select  (select next_val+1 from cr_w_trade_analysis_SEQ) as id,
+                 (select sum(quote_qty) from CR_W_TRADE_INFO where IS_BUYER_MAKER = 0) buy_QT,
+                 (select  sum(quote_qty) from CR_W_TRADE_INFO where IS_BUYER_MAKER = 1) sell_qty,
+                   (select sum(quote_qty) from CR_W_TRADE_INFO where IS_BUYER_MAKER = 0)
+                 - (select  sum(quote_qty) from CR_W_TRADE_INFO where IS_BUYER_MAKER = 1) as difference_sell_buy,
+				 min(time) from_time,
+                 max(time) to_time
+                from bourse.CR_W_TRADE_INFO;
+            
+         update cr_w_trade_analysis_SEQ
+        set next_val = next_val+1;
+        truncate bourse.CR_W_TRADE_INFO;
+        end if ;
+
+             
+ END$$
+ DELIMITER ;
+ 
+ 
+ 
+ 
