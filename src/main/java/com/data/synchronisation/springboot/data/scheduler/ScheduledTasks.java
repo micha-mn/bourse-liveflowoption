@@ -49,8 +49,8 @@ public class ScheduledTasks {
         this.cryptoAnalyseService = cryptoAnalyseService;
     }
 	
-	@Scheduled(fixedRate = 20000)
-	public void reportCurrentTime() {
+	@Scheduled(fixedRate = 10000)
+	public void syncCurrencyPrice() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -98,7 +98,7 @@ public class ScheduledTasks {
 	
 
 	@Scheduled(fixedRate = 3990005)
-	public void syncCurrencyInfo() {
+	public void syncMarketCapInfo() {
 		log.info("syncCurrencyInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -108,7 +108,7 @@ public class ScheduledTasks {
 	    try {
 	    	
 	    	
-	    	String marketCapUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc";
+	    	String marketCapUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&ids=ethena,bitcoin,wormhole";
 			
 			
 	    	ResponseEntity<CurrencyInfoDTO[]> response =

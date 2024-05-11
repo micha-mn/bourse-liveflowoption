@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.data.synchronisation.springboot.data.dto.DataDTO;
+import com.data.synchronisation.springboot.data.dto.GraphDataReqDTO;
+import com.data.synchronisation.springboot.data.dto.GraphFulllResponseDTO;
+import com.data.synchronisation.springboot.data.dto.GraphGeneralResponseDTO;
+import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
 
 
@@ -61,4 +65,9 @@ public class CryptoAnalyseController {
 		cryptoAnalyseService.deleteData(tablename,id);
 		return new ResponseEntity<>(HttpStatus.OK);
 	} 
+	
+	@PostMapping(value = "getGraphData")
+	public GraphFulllResponseDTO getGraphData(@RequestBody GraphDataReqDTO req) {
+		return cryptoAnalyseService.getGraphData(req);
+	}
 }

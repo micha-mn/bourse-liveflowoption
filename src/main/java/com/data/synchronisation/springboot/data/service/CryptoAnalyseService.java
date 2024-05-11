@@ -9,17 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
 import com.data.synchronisation.springboot.data.dto.DataDTO;
+import com.data.synchronisation.springboot.data.dto.GraphDataReqDTO;
+import com.data.synchronisation.springboot.data.dto.GraphFulllResponseDTO;
+import com.data.synchronisation.springboot.data.dto.GraphGeneralResponseDTO;
+import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.enums.TableNameEnum;
@@ -28,6 +36,7 @@ import com.data.synchronisation.springboot.domain.entity.Btc;
 import com.data.synchronisation.springboot.domain.entity.Doge;
 import com.data.synchronisation.springboot.domain.entity.Ena;
 import com.data.synchronisation.springboot.domain.entity.EnaInfo;
+import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
 import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
 import com.data.synchronisation.springboot.domain.entity.Eth;
 import com.data.synchronisation.springboot.domain.entity.EthFi;
@@ -42,6 +51,7 @@ import com.data.synchronisation.springboot.repositories.BtcRepository;
 import com.data.synchronisation.springboot.repositories.DogeRepository;
 import com.data.synchronisation.springboot.repositories.EnaInfoRepository;
 import com.data.synchronisation.springboot.repositories.EnaRepository;
+import com.data.synchronisation.springboot.repositories.EnaTrackingRepository;
 import com.data.synchronisation.springboot.repositories.EnaTradeInfoRepository;
 import com.data.synchronisation.springboot.repositories.EthFiRepository;
 import com.data.synchronisation.springboot.repositories.EthRepository;
@@ -72,9 +82,10 @@ public class CryptoAnalyseService {
 	private WInfoRepository wInfoRepository;
 	private EnaTradeInfoRepository enaTradeInfoRepository;
 	private WTradeInfoRepository  wTradeInfoRepository;
+	private EnaTrackingRepository enaTrackingRepository;
 	
 	
-
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	public CryptoAnalyseService(EthFiRepository ethFiRepository,
 			                    EnaRepository enaRepository,
@@ -89,7 +100,8 @@ public class CryptoAnalyseService {
 			                    EnaInfoRepository enaInfoRepository,
 			                    WInfoRepository wInfoRepository,
 			                    EnaTradeInfoRepository enaTradeInfoRepository,
-			                    WTradeInfoRepository  wTradeInfoRepository) {
+			                    WTradeInfoRepository  wTradeInfoRepository,
+			                    EnaTrackingRepository enaTrackingRepository) {
 		
 		this.ethFiRepository            = ethFiRepository;
 		this.enaRepository              = enaRepository;
@@ -105,6 +117,7 @@ public class CryptoAnalyseService {
 		this.wInfoRepository            = wInfoRepository;
 		this.enaTradeInfoRepository     = enaTradeInfoRepository;
 		this.wTradeInfoRepository       = wTradeInfoRepository;
+		this.enaTrackingRepository      = enaTrackingRepository;
 	}
 	
 	
@@ -207,6 +220,9 @@ public class CryptoAnalyseService {
 	
 	public void buildEntityObjectAndInsert(PriceCryptoRespDTO[] dataLst) {
 		PriceCryptoRespDTO data = PriceCryptoRespDTO.builder().build();
+		Optional<EnaTrackingTable> enaTrackingOpt ;
+		EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
+		int checkTrackingCnt = 0;
 		for(int i =0;i<dataLst.length; i++) {
 			data = dataLst[i];
 			if(data.getSymbol().equalsIgnoreCase("ETHFIUSDT")) {
@@ -216,10 +232,34 @@ public class CryptoAnalyseService {
 				ethFiRepository.save(ethFi);
 			}else
 			if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
-				Ena ena = Ena.builder().referDate(LocalDateTime.now())
+				LocalDateTime enaInsertTime = LocalDateTime.now();
+				Ena ena = Ena.builder().referDate(enaInsertTime)
 						.value(data.getPrice())
 						.build();
 				enaRepository.save(ena);
+				enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
+				enaTracking = enaTrackingOpt.get();
+				checkTrackingCnt = Integer.parseInt(enaTracking.getNotExecutedMinMaxPrice());
+				if(checkTrackingCnt > 10) {
+					// call procedure
+					StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_calculate_max_min_graph");
+			   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+			   		query.setParameter("cryptoCurrency","ENNA" );
+			   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+			   		query.setParameter("fromDate",enaTracking.getLastDateMinMaxExecuted() );
+			   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+			   		query.setParameter("toDate",enaInsertTime );
+			   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+			   		query.setParameter("period", "10" );
+			   		query.execute();
+				}else {
+					enaTracking.setNotExecutedMinMaxPrice(
+							String.valueOf(Integer.parseInt(enaTracking.getNotExecutedMinMaxPrice())+1)
+							);
+					// enaTracking.setLastDateMinMaxExecuted(LocalDateTime.now());
+					enaTrackingRepository.save(enaTracking);
+				}
+				
 			}else
 			if(data.getSymbol().equalsIgnoreCase("WUSDT")) {
 				W w = W.builder().referDate(LocalDateTime.now())
@@ -396,6 +436,88 @@ public class CryptoAnalyseService {
 				.time(triggerTime)
 				.build();
 		return wTradeInfo;
+	}
+	
+	public GraphFulllResponseDTO getGraphData(@RequestBody GraphDataReqDTO req) {
+		
+		LocalDateTime fromDate = LocalDateTime.parse(req.getFromDate(), formatter);
+		LocalDateTime toDate = LocalDateTime.parse(req.getToDate(), formatter);
+		
+		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_data_for_graph",GraphResponseDTO.class);
+   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+   		query.setParameter("cryptoCurrency",req.getCryptoCurrencyCode() );
+   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("fromDate",fromDate );
+   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("toDate",toDate );
+   		query.registerStoredProcedureParameter("period", Integer.class, ParameterMode.IN);
+   		query.setParameter("period",0 );
+   		query.registerStoredProcedureParameter("currencytype", String.class, ParameterMode.IN);
+   		// query.setParameter("currencytype",req.getDataType());
+   		query.setParameter("currencytype","NORMAL");
+   		List<GraphResponseDTO> graphNormalResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		GraphGeneralResponseDTO respNormal = GraphGeneralResponseDTO.builder()
+				.data(graphNormalResponseDTOlst)
+				.name("NORMAL")
+				.build();
+		
+		
+		
+		query = this.entityManager.createStoredProcedureQuery("cr_data_for_graph",GraphResponseDTO.class);
+   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+   		query.setParameter("cryptoCurrency",req.getCryptoCurrencyCode() );
+   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("fromDate",fromDate );
+   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("toDate",toDate );
+   		query.registerStoredProcedureParameter("period", Integer.class, ParameterMode.IN);
+   		query.setParameter("period",0 );
+   		query.registerStoredProcedureParameter("currencytype", String.class, ParameterMode.IN);
+   		// query.setParameter("currencytype",req.getDataType());
+   		query.setParameter("currencytype","MAX");
+   		List<GraphResponseDTO> graphMaxResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		GraphGeneralResponseDTO respMax = GraphGeneralResponseDTO.builder()
+				.data(graphMaxResponseDTOlst)
+				//.name(req.getDataType())
+				.name("MAX")
+				.build();
+		
+		
+		
+		
+		query = this.entityManager.createStoredProcedureQuery("cr_data_for_graph",GraphResponseDTO.class);
+   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+   		query.setParameter("cryptoCurrency",req.getCryptoCurrencyCode() );
+   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("fromDate",fromDate );
+   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("toDate",toDate );
+   		query.registerStoredProcedureParameter("period", Integer.class, ParameterMode.IN);
+   		query.setParameter("period",0 );
+   		query.registerStoredProcedureParameter("currencytype", String.class, ParameterMode.IN);
+   		// query.setParameter("currencytype",req.getDataType());
+   		query.setParameter("currencytype","MIN");
+   		List<GraphResponseDTO> graphRespMinResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		GraphGeneralResponseDTO respMin = GraphGeneralResponseDTO.builder()
+				.data(graphRespMinResponseDTOlst)
+				//.name(req.getDataType())
+				.name("MIN")
+				.build();	
+		
+		
+		GraphFulllResponseDTO resp = GraphFulllResponseDTO.builder()
+				.dataMax(respMax)
+				.dataMin(respMin)
+				.dataNormal(respNormal)
+				.build();
+	
+	   return resp; 
 	}
 	
 }

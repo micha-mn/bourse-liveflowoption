@@ -22,3 +22,6 @@ insert into CR_ENA_TRADE_INFO_SEQ value(1);
 insert into CR_W_TRADE_INFO_SEQ value(1);
 insert into cr_ena_trade_analysis_SEQ value(1);
 insert into cr_w_trade_analysis_SEQ value(1);
+insert into cr_ena_max_min_SEQ values ( 1 );
+insert into cr_ena_tracking_table_SEQ values ( 1 );
+insert into cr_ena_tracking_table values(1,null,null);
