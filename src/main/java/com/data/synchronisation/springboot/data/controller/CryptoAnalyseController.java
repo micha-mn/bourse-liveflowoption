@@ -38,6 +38,11 @@ public class CryptoAnalyseController {
 	public ModelAndView dataReadRxcelWritedb(ModelMap model) {
 		return new ModelAndView("html/index");
 	}
+	
+	@RequestMapping(value = "/graph")
+	public ModelAndView dataGraph(ModelMap model) {
+		return new ModelAndView("html/graph");
+	}
 
 	@GetMapping("/tablename")
 	public ResponseEntity<List<Map<String, String>>> getTableNameEnum() {

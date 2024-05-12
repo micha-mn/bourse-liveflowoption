@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph</title>
+<link href="/js/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link href="/css/style.css" rel="stylesheet" />
+<link rel="stylesheet" href="/js/jqwidgets/styles/jqx.base.css" type="text/css" />
+<link rel="stylesheet" href="/js/apexchart/apexcharts.css" type="text/css" />
+<style>
+.bg-white{
+background: white;
+}
+
+ .form-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+ 
+  input, button {
+    margin: 10px 10px 0 0;
+    flex: 1;
+  }
+  button {
+    align-self: flex-end;
+  }
+</style>
+</head>
+<body class="bg-white">
+	<div class="container mt-5">
+		<div class="form-group">
+		  <div class="col-4 ">
+			  <label>From Date</label>
+			  <div id='dateFrom'></div>
+		  </div>
+		  
+		 <div class="col-4 ">
+					<label>To Date </label>
+					<div id='dateTo'></div>
+		 </div>
+		   <button onclick="drawGraph()" class=" col-2 btn btn-primary">Draw</button>
+		</div>
+	
+	  <div class="col-12">
+	  		<div id="chart"></div>
+	  </div>
+	</div>
+	    
+	<script type="text/javascript" src="/js/jquery-3.6.3.min.js"></script>
+	<script type="text/javascript" src="/js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/js/apexchart/apexcharts.js"></script>
+	
+	<script type="text/javascript" src="/js/jqwidgets/jqxcore.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxdata.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxdatetimeinput.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxcalendar.js"></script>
+	
+	<script type="text/javascript" src="/js/graph.js"></script>
+
+</body>
+</html>

@@ -49,7 +49,7 @@ public class ScheduledTasks {
         this.cryptoAnalyseService = cryptoAnalyseService;
     }
 	
-	@Scheduled(fixedRate = 10000)
+	@Scheduled(fixedRate = 40000 ) // 20000   300000
 	public void syncCurrencyPrice() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -130,7 +130,7 @@ public class ScheduledTasks {
 		
 	}
 	
-	@Scheduled(fixedRate = 40000)
+	@Scheduled(fixedRate = 20000)  // 20000   300000
 	public void syncTradeInfo() {
 		log.info("syncTradeInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
