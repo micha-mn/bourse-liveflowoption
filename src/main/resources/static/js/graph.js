@@ -142,6 +142,34 @@ function drawGraph() {
 			        }
 			      }
 			    ];
+			    json.yaxis= [
+			      {
+						        
+			        y: 0.726,
+			        borderColor: "#00E396",
+			        label: {
+			          borderColor: "#00E396",
+			          style: {
+			            color: "#fff",
+			            background: "#00E396"
+			          },
+			          text: ""
+			        }
+			      
+			      },
+			      {
+			          y: 0.721,
+			        borderColor: "#ff0000",
+			        label: {
+			          borderColor: "#ff0000",
+			          style: {
+			            color: "#fff",
+			            background: "#ff0000"
+			          },
+			          text: ""
+			        }
+			      }
+			    ];
 			json.points = [{
 				x: 1715796490,
 				y: 0.71500000,
@@ -324,6 +352,7 @@ function getChartOption(json) {
 		annotations: {
 			//points: json.points,
 			//xaxis: json.xaxis
+			yaxis:json.yaxis
 			},
 	};
 	return options;
