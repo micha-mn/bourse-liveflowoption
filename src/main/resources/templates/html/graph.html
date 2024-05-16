@@ -6,76 +6,196 @@
 <title>Graph</title>
 <link href="/js/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
 <link href="/css/style.css" rel="stylesheet" />
-<link rel="stylesheet" href="/js/jqwidgets/styles/jqx.base.css" type="text/css" />
-<link rel="stylesheet" href="/js/apexchart/apexcharts.css" type="text/css" />
+<link rel="stylesheet" href="/js/jqwidgets/styles/jqx.base.css"
+	type="text/css" />
+<link rel="stylesheet" href="/js/apexchart/apexcharts.css"
+	type="text/css" />
 <style>
-.bg-white{
-background: white;
+.bg-white {
+	background: white;
 }
 
- .form-group {
-    display: flex;
-    flex-wrap: wrap;
-  }
- 
-  input, button {
-    margin: 10px 10px 0 0;
-    flex: 1;
-  }
-  button {
-    align-self: flex-end;
-  }
+.form-group {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+input, button {
+	margin: 10px 10px 0 0;
+	flex: 1;
+}
+
+button {
+	align-self: flex-end;
+}
+
+button.btn-style {
+	margin: 0;
+	padding: 0;
+	border: 0px;
+	background: transparent;
+	font-size: x-small;
+	display: block;
+}
+
+.time-input {
+	width: 30px;
+	height: 25px;
+	border: 1px solid #b7b7b7;
+	margin: 0;
+	border-radius: .2rem;
+}
 </style>
 </head>
 <body class="bg-white">
 	<div class="container mt-5">
 		<div class="form-group">
-		  <div class="col-4 ">
-			  <label>From Date</label>
-			  <div id='dateFrom'></div>
-		  </div>
-		  
-		 <div class="col-4 ">
-					<label>To Date </label>
-					<div id='dateTo'></div>
-		 </div>
-		   <button onclick="drawGraph()" class=" col-2 btn btn-primary">Draw</button>
+			
+			<div class="col-4">
+				<div class="d-flex justify-content-between">
+				<label>From Date</label>
+				<div class="d-flex">
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date1hours" class="time-input" min="0"
+								max="23" oninput="updateTime('date1',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date1','hours', 'up'); updateTime('date1',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date1','hours', 'down'); updateTime('date1',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+						
+					</div>
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date1minutes" class="time-input" min="0"
+								max="59" oninput="updateTime('date1',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date1','minutes', 'up'); updateTime('date1',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date1','minutes', 'down'); updateTime('date1',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+						
+					</div>
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date1seconds" class="time-input" min="0"
+								max="59" oninput="updateTime('date1',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date1','seconds', 'up'); updateTime('date1',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date1','seconds', 'down'); updateTime('date1',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+					</div>
+				</div>
+				</div>
+				<div id='dateFrom'></div>
+			</div>
+
+			<div class="col-4 ">
+				<div class="d-flex justify-content-between">
+				<label>To Date</label>
+				<div class="d-flex">
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date2hours" class="time-input" min="0"
+								max="23" oninput="updateTime('date2',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date2','hours', 'up'); updateTime('date2',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date2','hours', 'down'); updateTime('date2',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+						
+					</div>
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date2minutes" class="time-input" min="0"
+								max="59" oninput="updateTime('date2',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date2','minutes', 'up'); updateTime('date2',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date2','minutes', 'down'); updateTime('date2',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+						
+					</div>
+					<div class="d-flex">
+						<div>
+							<input type="number" id="date2seconds" class="time-input" min="0"
+								max="59" oninput="updateTime('date2',fromDate)">
+						</div>
+						<div class="pr-2 pl-2">
+							<button
+								onclick="changeTime('date2','seconds', 'up'); updateTime('date2',fromDate);"
+								class="btn-style">▲</button>
+							<button
+								onclick="changeTime('date2','seconds', 'down'); updateTime('date2',fromDate);"
+								class="btn-style">▼</button>
+						</div>
+					</div>
+				</div>
+				</div>
+				<div id='dateTo'></div>
+			</div>
+			<button onclick="drawGraph()" class=" col-2 btn btn-primary">Draw</button>
 		</div>
-	   <div class="col-12 d-flex">
-	  		  <div class="d-none">
-		  		  <label for="fromDate">From Date:</label>
-				  <input type="text" id="fromDate" class="d-none" readonly>
-				  <label for="toDate">To Date:</label>
-				  <input type="text" id="toDate" class="d-none" readonly>
-			  </div>
-			  <br>
-			  <div class="col-4 d-flex p-0">
-				  <button onclick="changeDate('from', 'back', 'hour')">Back 1 Hour (From)</button>
-				  <button onclick="changeDate('to', 'forward', 'hour')">Forward 1 Hour (To)</button>
-			  </div>
-			  <br>
-			  <div class="col-4 d-flex p-0">
-			  		<button onclick="changeDate('from', 'back', 'day')">Back 1 Day (From)</button>
-			  		<button onclick="changeDate('to', 'forward', 'day')">Forward 1 Day (To)</button>
-	 		  </div>
-	  </div>
-	  <div class="col-12">
-	  		<div id="chart"></div>
-	  </div>
-	  <div class="col-12">
-	  		<div id="chart-line"></div>
-	  </div>
+		<div class="col-12 d-flex">
+			<div class="d-none">
+				<label for="fromDate">From Date:</label> <input type="text"
+					id="fromDate" class="d-none" readonly> <label for="toDate">To
+					Date:</label> <input type="text" id="toDate" class="d-none" readonly>
+			</div>
+			<br>
+			<div class="col-4 d-flex p-0">
+				<button onclick="changeDate('from', 'back', 'hour')">Back 1
+					Hour (From)</button>
+				<button onclick="changeDate('to', 'forward', 'hour')">Forward
+					1 Hour (To)</button>
+			</div>
+			<br>
+			<div class="col-4 d-flex p-0">
+				<button onclick="changeDate('from', 'back', 'day')">Back 1
+					Day (From)</button>
+				<button onclick="changeDate('to', 'forward', 'day')">Forward
+					1 Day (To)</button>
+			</div>
+		</div>
+		<div class="col-12">
+			<div id="chart"></div>
+		</div>
+		<div class="col-12">
+			<div id="chart-line"></div>
+		</div>
 	</div>
-	    
+
 	<script type="text/javascript" src="/js/jquery-3.6.3.min.js"></script>
 	<script type="text/javascript" src="/js/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/js/apexchart/apexcharts.js"></script>
-	
+
 	<script type="text/javascript" src="/js/jqwidgets/jqxcore.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxdata.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxdatetimeinput.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxcalendar.js"></script>
-	
+
 	<script type="text/javascript" src="/js/graph.js"></script>
 
 </body>

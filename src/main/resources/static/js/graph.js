@@ -5,11 +5,12 @@ var toDate = new Date();
 var fromDate = new Date();
 fromDate = new Date(fromDate.setHours(fromDate.getHours() - 1));
 
+ setTimeInputs('date1',fromDate);
+ setTimeInputs('date2', toDate); 
+ 
 $(document).ready(function() {
-	$("#dateFrom").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '325px', height: '40px' });
-	$("#dateTo").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '325px', height: '40px' });
-
-
+	$("#dateFrom").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '100%', height: '40px' });
+	$("#dateTo").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '100%', height: '40px' });
 
 	$("#dateFrom").val(fromDate);
 	$("#dateTo").val(toDate);
@@ -50,7 +51,10 @@ function changeDate(type, direction, unit) {
       }
     }
   updateDateInputs();
-	$("#dateFrom").val(fromDate);
+ setTimeInputs('date1',fromDate);
+ setTimeInputs('date2', toDate);
+ 
+ 	$("#dateFrom").val(fromDate);
 	$("#dateTo").val(toDate);
 	drawGraph();
   }
@@ -146,6 +150,7 @@ function drawGraph() {
 			      {
 						        
 			        y: 0.726,
+			        strokeDashArray:0,
 			        borderColor: "#00E396",
 			        label: {
 			          borderColor: "#00E396",
@@ -158,7 +163,8 @@ function drawGraph() {
 			      
 			      },
 			      {
-			          y: 0.721,
+			        y: 0.721,
+			        strokeDashArray:0,
 			        borderColor: "#ff0000",
 			        label: {
 			          borderColor: "#ff0000",
@@ -276,6 +282,42 @@ function addMarginToMinMax(minValue, maxValue, marginPercentage) {
 	const margin = (maxValue - minValue) * (marginPercentage / 100);
 	return margin;
 }
+ 
+   function setTimeInputs(prefix,date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    document.getElementById(prefix + 'hours').value = hours < 10 ? '0' + hours : hours;
+    document.getElementById(prefix + 'minutes').value = minutes < 10 ? '0' + minutes : minutes;
+    document.getElementById(prefix + 'seconds').value = seconds < 10 ? '0' + seconds : seconds;
+  }
+  
+  function changeTime(prefix, field, direction) {
+    var input = document.getElementById(prefix + field);
+    var value = parseInt(input.value);
+    if (direction === 'up') {
+      value = (value + 1) % (field === 'hours' ? 24 : 60);
+    } else {
+      value = (value - 1 + (field === 'hours' ? 24 : 60)) % (field === 'hours' ? 24 : 60);
+    }
+    input.value = value < 10 ? '0' + value : value; // Add leading zero if necessary
+  }
+  function updateTime(prefix,date) {
+    var hours = parseInt(document.getElementById(prefix + 'hours').value);
+    var minutes = parseInt(document.getElementById(prefix + 'minutes').value);
+    var seconds = parseInt(document.getElementById(prefix + 'seconds').value);
+  
+
+    
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(seconds);
+    setTimeInputs( prefix, date);
+    
+    $("#dateFrom").val(fromDate);
+	$("#dateTo").val(toDate);
+
+  }
 
 function getChartOption(json) {
 	var options = {
