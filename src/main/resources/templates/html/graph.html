@@ -27,6 +27,7 @@ input, button {
 
 button {
 	align-self: flex-end;
+    border: 1px solid #d8d8d8;
 }
 
 button.btn-style {
@@ -37,6 +38,9 @@ button.btn-style {
 	font-size: x-small;
 	display: block;
 }
+button:active { 
+            transform: scale(0.8); 
+        } 
 
 .time-input {
 	width: 30px;
@@ -45,11 +49,14 @@ button.btn-style {
 	margin: 0;
 	border-radius: .2rem;
 }
+button.bck-frw-style {
+    font-size: small;
+}
 </style>
 </head>
 <body class="bg-white">
-	<div class="container mt-5">
-		<div class="form-group">
+	<div class="container mt-2 p-0">
+		<div class="form-group mb-0">
 			
 			<div class="col-4">
 				<div class="d-flex justify-content-between">
@@ -104,7 +111,7 @@ button.btn-style {
 				<div id='dateFrom'></div>
 			</div>
 
-			<div class="col-4 ">
+			<div class="col-4">
 				<div class="d-flex justify-content-between">
 				<label>To Date</label>
 				<div class="d-flex">
@@ -156,28 +163,30 @@ button.btn-style {
 				</div>
 				<div id='dateTo'></div>
 			</div>
-			<button onclick="drawGraph()" class=" col-2 btn btn-primary">Draw</button>
+			<button onclick="drawGraph()" class=" col-1 btn btn-primary">Draw</button>
+			
 		</div>
 		<div class="col-12 d-flex">
+		<div class="col-3 d-flex p-0">
+				<button onclick="changeDate('from', 'back', 'hour')"  class="bck-frw-style">Back 1
+					H</button>
+				<button onclick="changeDate('to', 'forward', 'hour')"  class="bck-frw-style">Forward
+					1 H</button>
+			</div>
+			<br>
+			<div class="col-3 d-flex p-0">
+				<button onclick="changeDate('from', 'back', 'day')"  class="bck-frw-style">Back 1
+					D</button>
+				<button onclick="changeDate('to', 'forward', 'day')"  class="bck-frw-style" >Forward
+					1 D</button>
+			</div>
 			<div class="d-none">
 				<label for="fromDate">From Date:</label> <input type="text"
 					id="fromDate" class="d-none" readonly> <label for="toDate">To
 					Date:</label> <input type="text" id="toDate" class="d-none" readonly>
 			</div>
 			<br>
-			<div class="col-4 d-flex p-0">
-				<button onclick="changeDate('from', 'back', 'hour')">Back 1
-					Hour (From)</button>
-				<button onclick="changeDate('to', 'forward', 'hour')">Forward
-					1 Hour (To)</button>
-			</div>
-			<br>
-			<div class="col-4 d-flex p-0">
-				<button onclick="changeDate('from', 'back', 'day')">Back 1
-					Day (From)</button>
-				<button onclick="changeDate('to', 'forward', 'day')">Forward
-					1 Day (To)</button>
-			</div>
+		
 		</div>
 		<div class="col-12">
 			<div id="chart"></div>
