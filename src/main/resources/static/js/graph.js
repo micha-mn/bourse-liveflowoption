@@ -21,7 +21,7 @@ $(document).ready(function() {
 
 });
 function changeDate(type, direction, unit) {
-    var amount = direction === 'forward' ? 1 : -1;
+     var amount = direction === 'forward' ? 1 : -1;
     if (unit === 'hour') {
       if (type === 'from') {
         var hours = fromDate.getHours() + amount;
@@ -34,21 +34,21 @@ function changeDate(type, direction, unit) {
         }
         fromDate.setHours(hours);
       } else {
-        var hours = fromDate.getHours() + amount;
+        var hours = toDate.getHours() + amount;
         if (hours < 0) {
-          fromDate.setDate(fromDate.getDate() - 1);
+          toDate.setDate(toDate.getDate() - 1);
           hours += 24;
         } else if (hours >= 24) {
-          fromDate.setDate(fromDate.getDate() + 1);
+          toDate.setDate(toDate.getDate() + 1);
           hours -= 24;
         }
-        fromDate.setHours(hours);
+        toDate.setHours(hours);
       }
     } else if (unit === 'day') {
       if (type === 'from') {
         fromDate.setDate(fromDate.getDate() + amount);
       } else {
-        fromDate.setDate(fromDate.getDate() + amount);
+        toDate.setDate(toDate.getDate() + amount);
       }
     }
   updateDateInputs();
