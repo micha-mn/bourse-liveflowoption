@@ -199,6 +199,7 @@ function drawGraph() {
 				            labelText += " Farthest";
 				          }
 				        }
+				       if (!isNaN(value))
 				        yannotation.push({
 				          y: value,
 				          strokeDashArray: 0,
