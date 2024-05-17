@@ -14,6 +14,7 @@ $(document).ready(function() {
 
 	$("#dateFrom").val(fromDate);
 	$("#dateTo").val(toDate);
+	drawGraph();
 
 	updateDateInputs();
 
@@ -348,7 +349,8 @@ function getChartOption(json) {
 			enabled: false
 		},
 		markers: {
-			size: [3, 5, 5]
+			size: [1, 3, 3],
+			strokeWidth: 0,
 		},
 		stroke: {
 			curve: 'straight',
