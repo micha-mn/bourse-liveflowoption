@@ -29,6 +29,10 @@ import com.data.synchronisation.springboot.data.dto.GraphFulllResponseDTO;
 import com.data.synchronisation.springboot.data.dto.GraphGeneralResponseDTO;
 import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
+import com.data.synchronisation.springboot.data.dto.Resistant;
+import com.data.synchronisation.springboot.data.dto.SupResDTO;
+import com.data.synchronisation.springboot.data.dto.Support;
+import com.data.synchronisation.springboot.data.dto.SupportResistantPointsDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.enums.TableNameEnum;
 import com.data.synchronisation.springboot.domain.entity.Bnb;
@@ -213,7 +217,7 @@ public class CryptoAnalyseService {
 	       return true;
 	}
 	
-	public boolean scheduledServiceDataSynchronization(PriceCryptoRespDTO[] dataLst) {
+	public boolean scheduledServiceCurrencyDataSynchronization(PriceCryptoRespDTO[] dataLst) {
 		   buildEntityObjectAndInsert(dataLst);
 	       return true;
 	}
@@ -518,6 +522,39 @@ public class CryptoAnalyseService {
 				.build();
 	
 	   return resp; 
+	}
+	
+	public SupportResistantPointsDTO getSupportResistantForGraph(@RequestBody GraphDataReqDTO req) {
+		
+		
+		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_support_resistant_for_graph",SupResDTO.class);
+   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+   		query.setParameter("cryptoCurrency",req.getCryptoCurrencyCode() );
+   		List<SupResDTO> supResDTOLst = (List<SupResDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		SupportResistantPointsDTO suppResPts = SupportResistantPointsDTO.builder().build();
+		Support sup = Support.builder().build();
+		Resistant res = Resistant.builder().build();
+		int i = 1;
+		for(SupResDTO each : supResDTOLst) {
+			if(i==1) {
+				sup.setSupport1(each.getSupport());
+				res.setResistant1(each.getResistant());
+			}
+			if(i==2) {
+				sup.setSupport2(each.getSupport());
+				res.setResistant2(each.getResistant());
+			}
+			if(i==3) {
+				sup.setSupport3(each.getSupport());
+				res.setResistant3(each.getResistant());
+			}
+			i++;
+		}
+		suppResPts.setSupport(sup);
+		suppResPts.setResistant(res);
+		return suppResPts;
 	}
 	
 }

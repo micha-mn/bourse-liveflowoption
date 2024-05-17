@@ -24,4 +24,4 @@ insert into cr_ena_trade_analysis_SEQ value(1);
 insert into cr_w_trade_analysis_SEQ value(1);
 insert into cr_ena_max_min_SEQ values ( 1 );
 insert into cr_ena_tracking_table_SEQ values ( 1 );
-insert into cr_ena_tracking_table values(1,null,null);
+insert into cr_ena_tracking_table values(1,'2024-05-10 21:01:32',0);

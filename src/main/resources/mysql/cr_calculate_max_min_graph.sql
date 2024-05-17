@@ -22,12 +22,12 @@ SET SESSION sql_mode = '';
 	 PREPARE stmt from @sql_text;
 	 EXECUTE stmt;
          
-   -- insert into cr_debug_table values(cryptoCurrency,@not_executed_min_max_price,@last_date_min_max_executed,toDate,period);
+    insert into cr_debug_table values(cryptoCurrency,@not_executed_min_max_price,@last_date_min_max_executed,toDate,period);
     if cryptoCurrency='ENNA' and @not_executed_min_max_price > 10 then
                    insert into cr_ena_max_min(id,max_price, refer_date_max_timeStamp, refer_date_max,
 													min_price, refer_date_min_timeStamp, refer_date_min,
                                                     refer_date_from, refer_date_to)
-                   select   @rownum:=@rownum + (select next_val from cr_ena_max_min_SEQ) as id,
+                   select   @rownum:=@rownum + 1 as id,
                              tab1.max_price,
 							 UNIX_TIMESTAMP((select max(refer_date) 
 											  from CR_ena y 
@@ -64,9 +64,9 @@ SET SESSION sql_mode = '';
                              -- where x.refer_date >= @last_date_min_max_executed
 							ORDER BY refer_date) n 
 							GROUP BY i
-						)tab1,(SELECT @rownum := 0) r;
+						)tab1,(SELECT @rownum := (select next_val from cr_ena_max_min_SEQ)) r;
                         
-                        update cr_ena_max_min_SEQ set next_val = (select max(id) + 1 from cr_ena_max_min);
+                        update cr_ena_max_min_SEQ set next_val = (select coalesce(max(id),0) + 1 from cr_ena_max_min);
                         
                         update cr_ena_tracking_table 
                            set last_date_min_max_executed = toDate,

@@ -2,7 +2,6 @@ package com.data.synchronisation.springboot.data.scheduler;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
-import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.Gson;
 
 @Component
@@ -49,7 +45,7 @@ public class ScheduledTasks {
         this.cryptoAnalyseService = cryptoAnalyseService;
     }
 	
-	@Scheduled(fixedRate = 40000 ) // 20000   300000
+	@Scheduled(fixedRate = 30000 ) // 20000   300000
 	public void syncCurrencyPrice() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -85,7 +81,7 @@ public class ScheduledTasks {
 	  		        		  entity,
 	  		        		  PriceCryptoRespDTO[].class);
 	    	
-	    	cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
+	    	cryptoAnalyseService.scheduledServiceCurrencyDataSynchronization(response.getBody());
 	    	
 	    	
 	   
@@ -96,6 +92,7 @@ public class ScheduledTasks {
 		
 	}
 	
+	/*
 
 	@Scheduled(fixedRate = 3990005)
 	public void syncMarketCapInfo() {
@@ -180,6 +177,7 @@ public class ScheduledTasks {
 		}
 		
 	}
+	*/
 	
 	
 }
