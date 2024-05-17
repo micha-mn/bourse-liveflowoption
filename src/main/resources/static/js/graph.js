@@ -80,7 +80,21 @@ function drawGraph() {
 		dataType: 'json',
 		timeout: 600000,
 		success: function(response) {
-			console.log(response);
+						console.log(response);
+
+		dataParams = {
+						"cryptoCurrencyCode": 'ENNA',
+				};
+			$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: "/getSupportResistantForGraph",
+		data: JSON.stringify(dataParams),
+		dataType: 'json',
+		timeout: 600000,
+		success: function(data) {
+			console.log(data);
+
 			const jsonArrayWithNumberTimestamp = response.dataNormal.data.map(obj => {
 				return {
 					...obj,
@@ -147,36 +161,63 @@ function drawGraph() {
 			        }
 			      }
 			    ];
-			    json.yaxis= [
-			      {
-						        
-			        y: 0.726,
-			        strokeDashArray:0,
-			        borderColor: "#00E396",
-			        label: {
-			          borderColor: "#00E396",
-			          style: {
-			            color: "#fff",
-			            background: "#00E396"
-			          },
-			          text: ""
-			        }
-			      
-			      },
-			      {
-			        y: 0.721,
-			        strokeDashArray:0,
-			        borderColor: "#ff0000",
-			        label: {
-			          borderColor: "#ff0000",
-			          style: {
-			            color: "#fff",
-			            background: "#ff0000"
-			          },
-			          text: ""
-			        }
-			      }
-			    ];
+			    const yannotation = [];
+				
+				// Loop over resistant and support
+				for (const key in data) {
+				  if (Object.hasOwnProperty.call(data, key)) {
+				    const element = data[key];
+				    // Convert values to numbers and calculate minimum, maximum, and middle
+				    const values = Object.values(element).map(parseFloat);
+				    const minVal = Math.min(...values);
+				    const maxVal = Math.max(...values);
+				    const middleVal = values.reduce((acc, val) => acc + val, 0) / values.length;
+				    
+				    for (const subKey in element) {
+				      if (Object.hasOwnProperty.call(element, subKey)) {
+				        const value = parseFloat(element[subKey]);
+				        const isSupport = key === 'support';
+				        const borderColor = isSupport ? "#FF0000" : "#00E396";
+				        let labelText = isSupport ? `support ${subKey.slice(-1)}` : `resistant ${subKey.slice(-1)}`;
+				
+				        if (isSupport) {
+				          // For support, invert the order of values
+				          if (value === maxVal) {
+				            labelText += " Closest";
+				          } else if (value === middleVal) {
+				            labelText += " Middle";
+				          } else if (value === minVal) {
+				            labelText += " Farthest";
+				          }
+				        } else {
+				          // For resistant, use the regular order of values
+				          if (value === minVal) {
+				            labelText += " Closest";
+				          } else if (value === middleVal) {
+				            labelText += " Middle";
+				          } else if (value === maxVal) {
+				            labelText += " Farthest";
+				          }
+				        }
+				        yannotation.push({
+				          y: value,
+				          strokeDashArray: 0,
+				          borderColor: borderColor,
+				          label: {
+				            borderColor: borderColor,
+				            style: {
+				              color: "#fff",
+				              background: borderColor
+				            },
+				            text: labelText
+				          }
+				        });
+				      }
+				    }
+				  }
+				}
+				console.log(yannotation);
+			    json.yaxis= yannotation
 			json.points = [{
 				x: 1715796490,
 				y: 0.71500000,
@@ -228,8 +269,14 @@ function drawGraph() {
 				chart.render();
 			}
 
-			testgraph();
-
+			// testgraph();
+			},
+					error: function(e) {
+			
+						console.log("ERROR : ", e);
+			
+					}
+		});
 
 		},
 		error: function(e) {
