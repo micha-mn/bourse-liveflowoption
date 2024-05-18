@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
@@ -33,7 +34,9 @@ import com.data.synchronisation.springboot.data.dto.Resistant;
 import com.data.synchronisation.springboot.data.dto.SupResDTO;
 import com.data.synchronisation.springboot.data.dto.Support;
 import com.data.synchronisation.springboot.data.dto.SupportResistantPointsDTO;
+import com.data.synchronisation.springboot.data.dto.TradeHistoryResDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
+import com.data.synchronisation.springboot.data.dto.TradeReqDTO;
 import com.data.synchronisation.springboot.data.enums.TableNameEnum;
 import com.data.synchronisation.springboot.domain.entity.Bnb;
 import com.data.synchronisation.springboot.domain.entity.Btc;
@@ -41,6 +44,7 @@ import com.data.synchronisation.springboot.domain.entity.Doge;
 import com.data.synchronisation.springboot.domain.entity.Ena;
 import com.data.synchronisation.springboot.domain.entity.EnaInfo;
 import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
+import com.data.synchronisation.springboot.domain.entity.EnaTradeHistoryInfo;
 import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
 import com.data.synchronisation.springboot.domain.entity.Eth;
 import com.data.synchronisation.springboot.domain.entity.EthFi;
@@ -56,6 +60,7 @@ import com.data.synchronisation.springboot.repositories.DogeRepository;
 import com.data.synchronisation.springboot.repositories.EnaInfoRepository;
 import com.data.synchronisation.springboot.repositories.EnaRepository;
 import com.data.synchronisation.springboot.repositories.EnaTrackingRepository;
+import com.data.synchronisation.springboot.repositories.EnaTradeHistoryInfoRepository;
 import com.data.synchronisation.springboot.repositories.EnaTradeInfoRepository;
 import com.data.synchronisation.springboot.repositories.EthFiRepository;
 import com.data.synchronisation.springboot.repositories.EthRepository;
@@ -87,6 +92,7 @@ public class CryptoAnalyseService {
 	private EnaTradeInfoRepository enaTradeInfoRepository;
 	private WTradeInfoRepository  wTradeInfoRepository;
 	private EnaTrackingRepository enaTrackingRepository;
+	private EnaTradeHistoryInfoRepository enaTradeHistoryInfoRepository;
 	
 	
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -105,7 +111,8 @@ public class CryptoAnalyseService {
 			                    WInfoRepository wInfoRepository,
 			                    EnaTradeInfoRepository enaTradeInfoRepository,
 			                    WTradeInfoRepository  wTradeInfoRepository,
-			                    EnaTrackingRepository enaTrackingRepository) {
+			                    EnaTrackingRepository enaTrackingRepository,
+			                    EnaTradeHistoryInfoRepository enaTradeHistoryInfoRepository) {
 		
 		this.ethFiRepository            = ethFiRepository;
 		this.enaRepository              = enaRepository;
@@ -122,6 +129,7 @@ public class CryptoAnalyseService {
 		this.enaTradeInfoRepository     = enaTradeInfoRepository;
 		this.wTradeInfoRepository       = wTradeInfoRepository;
 		this.enaTrackingRepository      = enaTrackingRepository;
+		this.enaTradeHistoryInfoRepository = enaTradeHistoryInfoRepository;
 	}
 	
 	
@@ -403,6 +411,47 @@ public class CryptoAnalyseService {
 		} 
 	}
 	
+  public void saveHistoryTradeInfo(TradeInfoDTO[] dataLst,String currrency) {
+		if(currrency.equalsIgnoreCase("ENA")) {
+			EnaTradeHistoryInfo enaTradeHistoryInfo = EnaTradeHistoryInfo.builder().build();
+			List<EnaTradeHistoryInfo> enaTradeHistoryInfoLst = new ArrayList<EnaTradeHistoryInfo>();
+			long test_timestamp ;
+			LocalDateTime triggerTime ;
+			        
+			for(int i=0;i<dataLst.length;i++) {
+				test_timestamp = Long.valueOf(dataLst[i].getTime());
+				triggerTime =
+				        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
+				                                TimeZone.getDefault().toZoneId()); 
+				enaTradeHistoryInfo = enaTradeHistoryInfo.builder()
+						.id(dataLst[i].getId())
+						.isBestMatch(dataLst[i].getIsBestMatch())
+						.isBuyerMaker(dataLst[i].isBuyerMaker())
+						.price(dataLst[i].getPrice())
+						.qty(dataLst[i].getQty())
+						.quoteQty(dataLst[i].getQuoteQty())
+						.time(triggerTime)
+						.build();
+				enaTradeHistoryInfoLst.add(enaTradeHistoryInfo);
+			}
+			
+			enaTradeHistoryInfoLst = enaTradeHistoryInfoLst.stream().distinct().collect(Collectors.toList());
+			enaTradeHistoryInfoRepository.saveAll(enaTradeHistoryInfoLst);
+		}
+	     else
+			if(currrency.equalsIgnoreCase("W")) {
+				WTradeInfo   wTradeInfo = WTradeInfo.builder().build();
+				List<WTradeInfo> wTradeInfoLst = new ArrayList<WTradeInfo>();
+				for(int i=0;i<dataLst.length;i++) {
+					wTradeInfo = buildWTradeInfoEntity(dataLst[i]);
+					wTradeInfoLst.add(wTradeInfo);
+				}
+				wTradeInfoRepository.saveAll(wTradeInfoLst);
+		} 
+	}
+	
+  
+  
 	public EnaTradeInfo buildEnaTradeInfoEntity(TradeInfoDTO data) {
 		long test_timestamp = Long.valueOf(data.getTime());
 		LocalDateTime triggerTime =
@@ -555,6 +604,29 @@ public class CryptoAnalyseService {
 		suppResPts.setSupport(sup);
 		suppResPts.setResistant(res);
 		return suppResPts;
+	}
+	
+    public List getTradeHistory( TradeReqDTO req) {
+		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history_for_graph",TradeHistoryResDTO.class);
+   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
+   		query.setParameter("currencyCode",req.getCurrencyCode() );
+   		
+   		query.registerStoredProcedureParameter("datePoint", String.class, ParameterMode.IN);
+   		query.setParameter("datePoint",req.getDatePoint() );
+   		
+   		query.registerStoredProcedureParameter("intervals", String.class, ParameterMode.IN);
+   		query.setParameter("intervals",req.getIntervals() );
+   		
+   		List<TradeHistoryResDTO> tradeHistoryResDTOLst = (List<TradeHistoryResDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		TradeHistoryResDTO tradeHistoryResDTO = TradeHistoryResDTO.builder().build();
+		if(tradeHistoryResDTOLst.size()>0)
+			tradeHistoryResDTO = tradeHistoryResDTOLst.get(0);
+	    List respArr= new ArrayList<>();
+	    respArr.add(tradeHistoryResDTO.getBuy());
+	    respArr.add(tradeHistoryResDTO.getSell());
+		return respArr;
 	}
 	
 }

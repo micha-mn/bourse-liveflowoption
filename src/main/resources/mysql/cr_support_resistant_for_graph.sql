@@ -1,3 +1,10 @@
+USE `bourse`;
+DROP procedure IF EXISTS `cr_support_resistant_for_graph`;
+
+USE `bourse`;
+DROP procedure IF EXISTS `bourse`.`cr_support_resistant_for_graph`;
+;
+
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `cr_support_resistant_for_graph`(IN cryptoCurrency VARCHAR(255))
 BEGIN
@@ -18,7 +25,7 @@ if cryptoCurrency='ENNA' then
        i
        */
 from(  
-		select @rownum := @row_number +1 as id
+		select @row_number := @row_number +1 as id
                ,max_price, 
                refer_date_max,
                min_price,
@@ -27,15 +34,15 @@ from(
                refer_date_to,
                FLOOR(@i:=@i+1/(select round(count(1)/3) 
                                   from cr_ena_max_min 
-								 where refer_date_max >= DATE_SUB(NOW(),INTERVAL 7 HOUR)))
+								 where refer_date_max >= DATE_SUB(NOW(),INTERVAL 3 HOUR)))
 						*(select round(count(1)/3) 
                             from cr_ena_max_min 
-						    where refer_date_max >= DATE_SUB(NOW(),INTERVAL 5 HOUR)) i
-              -- ,count(1)
+						    where refer_date_max >= DATE_SUB(NOW(),INTERVAL 3 HOUR)) i
+             
 		from  cr_ena_max_min,
 			  (SELECT @i:=0) vars,
               (SELECT @row_number:=0) vars1
-		where refer_date_max >= DATE_SUB(NOW(),INTERVAL 4 HOUR)
+		where refer_date_max >= DATE_SUB(NOW(),INTERVAL 3 HOUR)
 		order by refer_date_max desc) tab
     group by i;
    end if;    

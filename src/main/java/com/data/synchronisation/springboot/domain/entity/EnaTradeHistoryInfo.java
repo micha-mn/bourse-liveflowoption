@@ -25,26 +25,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor
 @Entity
-@Table(name = "cr_ena_tracking_table")
-public class EnaTrackingTable {
+@Table(name = "cr_ena_trade_history_info")
+public class EnaTradeHistoryInfo {
 	@Id
-	 @GeneratedValue(generator = "cr_ena_tracking_table_SEQ")
+	 @GeneratedValue(generator = "CR_ENA_TRADE_HISTORY_INFO_SEQ")
 	 @GenericGenerator(
-	      name = "cr_ena_tracking_table_SEQ",
+	      name = "CR_ENA_TRADE_HISTORY_INFO_SEQ",
 	      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
 	      parameters = {
-	        @Parameter(name = "sequence_name", value = "cr_ena_tracking_table_SEQ"),
+	        @Parameter(name = "sequence_name", value = "CR_ENA_TRADE_HISTORY_INFO_SEQ"),
 	        @Parameter(name = "initial_value", value = "1"),
 	        @Parameter(name = "increment_size", value = "1")
 	        }
 	    )
+	private Long id1;
 	@Column(name = "ID")
-	private long id;
-	@Column(name = "NOT_EXECUTED_MIN_MAX_PRICE")
-    private String notExecutedMinMaxPrice;
-	@Column(name = "LAST_HISTORICAL_DATA_ID")
-    private String lastHistoricalDataId;
-	@Column(name = "LAST_DATE_MIN_MAX_EXECUTED")
-    private LocalDateTime lastDateMinMaxExecuted;
-	
+	private String id;
+	@Column(name = "PRICE")
+    private String price;
+	@Column(name = "QTY")
+    private String qty;
+	@Column(name = "QUOTE_QTY")
+    private String quoteQty;
+	@Column(name = "TIME")
+    private LocalDateTime time;
+	@Column(name = "IS_BUYER_MAKER")
+    private boolean isBuyerMaker;
+	@Column(name = "IS_BEST_MATCH")
+    private String isBestMatch;
+	@Column(name = "REFER_DATE")
+	@CreationTimestamp
+    private LocalDateTime referDate;
 }

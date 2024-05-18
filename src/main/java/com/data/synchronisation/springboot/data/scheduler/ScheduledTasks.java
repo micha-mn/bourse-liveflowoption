@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
@@ -25,6 +26,8 @@ import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
+import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
+import com.data.synchronisation.springboot.repositories.EnaTrackingRepository;
 import com.google.gson.Gson;
 
 @Component
@@ -36,14 +39,18 @@ public class ScheduledTasks {
     private String serviceName;
     private CryptoAnalyseService cryptoAnalyseService;
 	private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
-
+	private EnaTrackingRepository enaTrackingRepository;
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-	public ScheduledTasks(RestTemplate restTemplate,CryptoAnalyseService cryptoAnalyseService) {
+	public ScheduledTasks(RestTemplate restTemplate,CryptoAnalyseService cryptoAnalyseService,
+			EnaTrackingRepository enaTrackingRepository) {
         this.serviceName = this.getClass().getName();
         this.restTemplate = restTemplate;
         this.cryptoAnalyseService = cryptoAnalyseService;
+        this.enaTrackingRepository = enaTrackingRepository;
     }
+	
+	/*
 	
 	@Scheduled(fixedRate = 30000 ) // 20000   300000
 	public void syncCurrencyPrice() {
@@ -91,6 +98,80 @@ public class ScheduledTasks {
 		}
 		
 	}
+	*/
+	
+	
+	@Scheduled(fixedRate = 20000)  // 20000   300000
+	public void syncHistoricalTradeEnaInfo() {
+		log.info("syncTradeInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
+		
+		HttpHeaders headers = new HttpHeaders();
+	    headers.set("Content-Type", "application/json");
+	    
+	    HttpEntity entity = new HttpEntity<>(headers);
+	    try {
+	    	Optional<EnaTrackingTable> enaTrackingOpt ;
+	    	EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
+	    	enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
+	    	String marketCapUrl = "https://api.binance.com/api/v3/historicalTrades?symbol=ENAUSDT&limit=5000";
+			String lastHistoricalDataId = null;
+			if(enaTrackingOpt.isPresent())
+			{
+				enaTracking = enaTrackingOpt.get();
+				if(enaTracking.getLastHistoricalDataId() != null) {
+					lastHistoricalDataId = enaTracking.getLastHistoricalDataId();
+					marketCapUrl = marketCapUrl +"&fromId="+lastHistoricalDataId;
+				}
+				
+			}
+	    	// https://api.binance.com/api/v3/historicalTrades?symbol=ETHUSDT&fromId=1423720033&limit=5000
+		    	
+		    	
+		    	ResponseEntity<TradeInfoDTO[]> response =
+		  		          restTemplate.exchange(
+		  		        		marketCapUrl,
+		  		        		  HttpMethod.GET,
+		  		        		  entity,
+		  		        		TradeInfoDTO[].class);
+		    	//cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
+		    	TradeInfoDTO[] responselst = response.getBody();
+		    	cryptoAnalyseService.saveHistoryTradeInfo(responselst,"ENA");
+		    	
+		    	
+		    	StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history");
+		   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
+		   		query.setParameter("currencyCode","ENA" );
+		   		query.execute();
+		    	
+		   		
+		   		/*
+		    	marketCapUrl = "https://api.binance.com/api/v3/trades?symbol=WUSDT";
+		    	response =
+		  		          restTemplate.exchange(
+		  		        		marketCapUrl,
+		  		        		  HttpMethod.GET,
+		  		        		  entity,
+		  		        		TradeInfoDTO[].class);
+		    	//cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
+		    	
+		    	responselst = response.getBody();
+		    	cryptoAnalyseService.saveTradeInfo(responselst,"W");
+		    	
+		    	TimeUnit.MILLISECONDS.sleep(10000);
+		    	query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor");
+		   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
+		   		query.setParameter("currencyCode","W" );
+		    	// query.registerStoredProcedureParameter("referDate", String.class, ParameterMode.IN);
+		   		// query.setParameter("referDate",referDate );
+		   		query.execute();
+		   		*/
+		   		
+	    }catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	/*
 

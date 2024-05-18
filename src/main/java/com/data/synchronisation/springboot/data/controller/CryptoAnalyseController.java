@@ -22,6 +22,8 @@ import com.data.synchronisation.springboot.data.dto.GraphFulllResponseDTO;
 import com.data.synchronisation.springboot.data.dto.GraphGeneralResponseDTO;
 import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.data.dto.SupportResistantPointsDTO;
+import com.data.synchronisation.springboot.data.dto.TradeHistoryResDTO;
+import com.data.synchronisation.springboot.data.dto.TradeReqDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
 
 
@@ -81,6 +83,13 @@ public class CryptoAnalyseController {
 	public ResponseEntity<SupportResistantPointsDTO> getSupportResistantForGraph(@RequestBody GraphDataReqDTO req) {
 		
 		SupportResistantPointsDTO resp = cryptoAnalyseService.getSupportResistantForGraph(req);
+		return new ResponseEntity<>(resp,HttpStatus.OK);
+	}
+	
+	@PostMapping(value = "data/trade/history")
+	public ResponseEntity<List> getTradeHistory(@RequestBody TradeReqDTO req) {
+		
+		List resp = cryptoAnalyseService.getTradeHistory(req);
 		return new ResponseEntity<>(resp,HttpStatus.OK);
 	}
 }

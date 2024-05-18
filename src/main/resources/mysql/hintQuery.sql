@@ -58,3 +58,10 @@ select   @rownum:=@rownum + 1 as id,
     select id, refer_date_max_timestamp as x,refer_date_max_timestamp as y
          from cr_ena_max_min
        where refer_date_max between "2024-05-11 17:00:05" and "2024-05-11 17:24:05";
+       
+delete from cr_ena_trade_history_info;
+delete from cr_ena_trade_history_info_seq;
+insert into cr_ena_trade_history_info_seq value(1);
+delete from cr_ena_trade_history_analysis;
+delete from cr_ena_trade_history_analysis_seq;
+insert into cr_ena_trade_history_analysis_seq value(1);
