@@ -1,4 +1,5 @@
 var chart;
+var chart1;
 var json = {};
 
 var toDate = new Date();
@@ -372,6 +373,14 @@ function getChartOption(json) {
 	var options = {
 		series: json.series,
 		chart: {
+		 events: {
+        click(event, chartContext, config) {
+            console.log(config.config.series[config.seriesIndex])
+            console.log(config.config.series[config.seriesIndex].name)
+            console.log(config.config.series[config.seriesIndex].data[config.dataPointIndex])
+        drawPieChart(config.config.series[config.seriesIndex].data[config.dataPointIndex].x);
+                }
+        },
 			height: 350,
 			type: 'line',
 			id: 'fb1',
@@ -491,5 +500,70 @@ function testgraph(){
         var chart = new ApexCharts(document.querySelector("#chart-line"), options);
         chart.render();
       
+      
+}
+function drawPieChart(date){
+	const dataParams = {
+						"currencyCode": 'ENA',
+						"datePoint":timestampToDate(date),
+						"intervals":""
+				};
+	const options = {
+	  style: 'decimal', // Format as decimal
+	  maximumFractionDigits: 2 // Maximum number of fraction digits
+	};			
+				
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: "/data/trade/history",
+		data: JSON.stringify(dataParams),
+		dataType: 'json',
+		timeout: 600000,
+		success: function(data) {
+			console.log(data);
+			const numbersAsFloat = data.map(num => parseFloat(num));
+
+		     var options = {
+	          series: numbersAsFloat,
+	          chart: {
+	          type: 'donut',
+	        },
+	        tooltip:{
+				custom: function({ series, seriesIndex, w }) {
+				return '<div class="arrow_box">' +
+					'<span>' + new Intl.NumberFormat('en-US', options).format(series[seriesIndex]) + " M" + '</span>' +
+					'</div>'
+			},
+			},
+	        labels:['Buy','Sell'],
+	        colors: ['#00e396','#ff0000'],
+	        responsive: [{
+	          breakpoint: 480,
+	          options: {
+	            chart: {
+	              width: 200
+	            },
+	            legend: {
+	              position: 'bottom'
+	            }
+	          }
+	        }],
+	        
+	        };
+			if (chart1 != null) {
+				chart1.updateOptions(options);
+			}
+			else {
+				 chart1 = new ApexCharts(document.querySelector("#pie-chart"), options);
+        		 chart1.render();
+			}
+			},
+		error: function(e) {
+
+			console.log("ERROR : ", e);
+
+		}
+	});
       
 }
