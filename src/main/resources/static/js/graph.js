@@ -1,7 +1,7 @@
 var chart;
 var chart1;
 var json = {};
-
+var historyDataArray;
 var toDate = new Date();
 var fromDate = new Date();
 fromDate = new Date(fromDate.setHours(fromDate.getHours() - 1));
@@ -522,10 +522,29 @@ function drawPieChart(date){
 		timeout: 600000,
 		success: function(data) {
 			console.log(data);
-			const numbersAsFloat = data.map(num => parseFloat(num));
+		    historyDataArray={
+				data15Min:data,
+				data30Min:data,
+				data45Min:data,
+				data1Hour:data,
+				data1Day:data,
+			};
+			const numbersAsFloat = historyDataArray.data15Min.map(num => parseFloat(num));
+			updatePieChart(numbersAsFloat);
+		    
+			},
+		error: function(e) {
 
-		     var options = {
-	          series: numbersAsFloat,
+			console.log("ERROR : ", e);
+
+		}
+	});
+      
+}
+function updatePieChart(data)
+{
+	   var options = {
+	          series: data,
 	          chart: {
 	          type: 'donut',
 	        },
@@ -558,12 +577,8 @@ function drawPieChart(date){
 				 chart1 = new ApexCharts(document.querySelector("#pie-chart"), options);
         		 chart1.render();
 			}
-			},
-		error: function(e) {
-
-			console.log("ERROR : ", e);
-
-		}
-	});
-      
 }
+  function updatePieChartTime(dataKey) {
+            const numbersAsFloat = historyDataArray[dataKey].map(num => parseFloat(num));
+            updatePieChart(numbersAsFloat);
+        }
