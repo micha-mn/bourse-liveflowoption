@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor 
 @AllArgsConstructor
-public class TradeHistoryResDTO {
+public class TradeHistoryResForGraphDTO {
 	
 	@Id
 	private String id;

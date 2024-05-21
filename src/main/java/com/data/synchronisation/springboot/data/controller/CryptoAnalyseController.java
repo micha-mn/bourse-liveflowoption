@@ -24,6 +24,7 @@ import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.data.dto.SupportResistantPointsDTO;
 import com.data.synchronisation.springboot.data.dto.TradeHistoryResDTO;
 import com.data.synchronisation.springboot.data.dto.TradeReqDTO;
+import com.data.synchronisation.springboot.data.dto.TradeResponseDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
 
 
@@ -87,9 +88,9 @@ public class CryptoAnalyseController {
 	}
 	
 	@PostMapping(value = "data/trade/history")
-	public ResponseEntity<List> getTradeHistory(@RequestBody TradeReqDTO req) {
+	public ResponseEntity<TradeResponseDTO> getTradeHistory(@RequestBody TradeReqDTO req) {
 		
-		List resp = cryptoAnalyseService.getTradeHistory(req);
+		TradeResponseDTO resp = cryptoAnalyseService.getTradeHistory(req);
 		return new ResponseEntity<>(resp,HttpStatus.OK);
 	}
 }

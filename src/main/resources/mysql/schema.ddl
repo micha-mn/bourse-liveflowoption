@@ -24,6 +24,11 @@ insert into cr_ena_trade_analysis_SEQ value(1);
 insert into cr_w_trade_analysis_SEQ value(1);
 insert into cr_ena_max_min_SEQ values ( 1 );
 insert into cr_ena_tracking_table_SEQ values ( 1 );
-insert into cr_ena_tracking_table values(1,'2024-05-10 21:01:32',0);
+insert into cr_ethfi_tracking_table values(1,'2024-05-21 07:01:32',0,null);
 insert into cr_ena_trade_history_info_seq value(1);
 insert into cr_doge_seq value(1);
+
+
+ /*--ETHFI start----*/
+
+ /*--ETHFI end----*/

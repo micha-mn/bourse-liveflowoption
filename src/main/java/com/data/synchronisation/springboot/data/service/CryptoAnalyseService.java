@@ -37,6 +37,7 @@ import com.data.synchronisation.springboot.data.dto.SupportResistantPointsDTO;
 import com.data.synchronisation.springboot.data.dto.TradeHistoryResDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.dto.TradeReqDTO;
+import com.data.synchronisation.springboot.data.dto.TradeResponseDTO;
 import com.data.synchronisation.springboot.data.enums.TableNameEnum;
 import com.data.synchronisation.springboot.domain.entity.Bnb;
 import com.data.synchronisation.springboot.domain.entity.Btc;
@@ -47,6 +48,7 @@ import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
 import com.data.synchronisation.springboot.domain.entity.EnaTradeHistoryInfo;
 import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
 import com.data.synchronisation.springboot.domain.entity.Eth;
+import com.data.synchronisation.springboot.domain.entity.EthFITrackingTable;
 import com.data.synchronisation.springboot.domain.entity.EthFi;
 import com.data.synchronisation.springboot.domain.entity.Floki;
 import com.data.synchronisation.springboot.domain.entity.Pepe;
@@ -62,6 +64,8 @@ import com.data.synchronisation.springboot.repositories.EnaRepository;
 import com.data.synchronisation.springboot.repositories.EnaTrackingRepository;
 import com.data.synchronisation.springboot.repositories.EnaTradeHistoryInfoRepository;
 import com.data.synchronisation.springboot.repositories.EnaTradeInfoRepository;
+import com.data.synchronisation.springboot.repositories.EthFITrackingRepository;
+import com.data.synchronisation.springboot.repositories.EthFITradeHistoryInfoRepository;
 import com.data.synchronisation.springboot.repositories.EthFiRepository;
 import com.data.synchronisation.springboot.repositories.EthRepository;
 import com.data.synchronisation.springboot.repositories.FlokiRepository;
@@ -93,6 +97,8 @@ public class CryptoAnalyseService {
 	private WTradeInfoRepository  wTradeInfoRepository;
 	private EnaTrackingRepository enaTrackingRepository;
 	private EnaTradeHistoryInfoRepository enaTradeHistoryInfoRepository;
+	private EthFITrackingRepository ethFITrackingRepository;
+	private EthFITradeHistoryInfoRepository ethFITradeHistoryInfoRepository;
 	
 	
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -112,7 +118,9 @@ public class CryptoAnalyseService {
 			                    EnaTradeInfoRepository enaTradeInfoRepository,
 			                    WTradeInfoRepository  wTradeInfoRepository,
 			                    EnaTrackingRepository enaTrackingRepository,
-			                    EnaTradeHistoryInfoRepository enaTradeHistoryInfoRepository) {
+			                    EnaTradeHistoryInfoRepository enaTradeHistoryInfoRepository,
+			                    EthFITrackingRepository ethFITrackingRepository,
+			                    EthFITradeHistoryInfoRepository ethFITradeHistoryInfoRepository) {
 		
 		this.ethFiRepository            = ethFiRepository;
 		this.enaRepository              = enaRepository;
@@ -130,6 +138,7 @@ public class CryptoAnalyseService {
 		this.wTradeInfoRepository       = wTradeInfoRepository;
 		this.enaTrackingRepository      = enaTrackingRepository;
 		this.enaTradeHistoryInfoRepository = enaTradeHistoryInfoRepository;
+		this.ethFITrackingRepository       = ethFITrackingRepository;
 	}
 	
 	
@@ -232,19 +241,45 @@ public class CryptoAnalyseService {
 	
 	public void buildEntityObjectAndInsert(PriceCryptoRespDTO[] dataLst) {
 		PriceCryptoRespDTO data = PriceCryptoRespDTO.builder().build();
-		Optional<EnaTrackingTable> enaTrackingOpt ;
-		EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
 		int checkTrackingCnt = 0;
 		for(int i =0;i<dataLst.length; i++) {
 			data = dataLst[i];
 			if(data.getSymbol().equalsIgnoreCase("ETHFIUSDT")) {
+				LocalDateTime ethFIInsertTime = LocalDateTime.now();
+				Optional<EthFITrackingTable> ethFITrackingTableOpt ;
+				EthFITrackingTable ethFITracking = EthFITrackingTable.builder().build();
 				EthFi ethFi = EthFi.builder().referDate(LocalDateTime.now())
 						.value(data.getPrice())
 						.build();
 				ethFiRepository.save(ethFi);
+				ethFITrackingTableOpt = ethFITrackingRepository.findById(Long.valueOf("1"));
+				ethFITracking = ethFITrackingTableOpt.get();
+				checkTrackingCnt = Integer.parseInt(ethFITracking.getNotExecutedMinMaxPrice());
+				if(checkTrackingCnt > 10) {
+					// call procedure
+					StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_calculate_max_min_graph");
+			   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
+			   		query.setParameter("cryptoCurrency","ETHFI" );
+			   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+			   		query.setParameter("fromDate",ethFITracking.getLastDateMinMaxExecuted() );
+			   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+			   		query.setParameter("toDate",ethFIInsertTime );
+			   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+			   		query.setParameter("period", "10" );
+			   		query.execute();
+				}else {
+					ethFITracking.setNotExecutedMinMaxPrice(
+							String.valueOf(Integer.parseInt(ethFITracking.getNotExecutedMinMaxPrice())+1)
+							);
+					// enaTracking.setLastDateMinMaxExecuted(LocalDateTime.now());
+					ethFITrackingRepository.save(ethFITracking);
+				}
 			}else
 			if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
 				LocalDateTime enaInsertTime = LocalDateTime.now();
+				Optional<EnaTrackingTable> enaTrackingOpt ;
+				EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
+				enaInsertTime = LocalDateTime.now();
 				Ena ena = Ena.builder().referDate(enaInsertTime)
 						.value(data.getPrice())
 						.build();
@@ -606,7 +641,7 @@ public class CryptoAnalyseService {
 		return suppResPts;
 	}
 	
-    public List getTradeHistory( TradeReqDTO req) {
+    public TradeResponseDTO getTradeHistory( TradeReqDTO req) {
 		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history_for_graph",TradeHistoryResDTO.class);
    		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
    		query.setParameter("currencyCode",req.getCurrencyCode() );
@@ -621,12 +656,50 @@ public class CryptoAnalyseService {
    		entityManager.clear();
 		entityManager.close();
 		TradeHistoryResDTO tradeHistoryResDTO = TradeHistoryResDTO.builder().build();
-		if(tradeHistoryResDTOLst.size()>0)
+		TradeResponseDTO tradeResponseDTO = TradeResponseDTO.builder().build();
+		List respArr= new ArrayList<>();
+		
+		if(tradeHistoryResDTOLst.size()>0) {
 			tradeHistoryResDTO = tradeHistoryResDTOLst.get(0);
-	    List respArr= new ArrayList<>();
-	    respArr.add(tradeHistoryResDTO.getBuy());
-	    respArr.add(tradeHistoryResDTO.getSell());
-		return respArr;
+	    
+		    respArr.add(tradeHistoryResDTO.getBuy15Min());
+		    respArr.add(tradeHistoryResDTO.getSell15Min());
+		    tradeResponseDTO.setHistory15Min(respArr);
+		    
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy30Min());
+		    respArr.add(tradeHistoryResDTO.getSell30Min());
+		    tradeResponseDTO.setHistory30Min(respArr);
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy45Min());
+		    respArr.add(tradeHistoryResDTO.getSell45Min());
+		    tradeResponseDTO.setHistory45Min(respArr);
+		    
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy1Hour());
+		    respArr.add(tradeHistoryResDTO.getSell1Hour());
+		    tradeResponseDTO.setHistory1Hour(respArr);
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy2Hour());
+		    respArr.add(tradeHistoryResDTO.getSell2Hour());
+		    tradeResponseDTO.setHistory2Hour(respArr);
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy4Hour());
+		    respArr.add(tradeHistoryResDTO.getSell4Hour());
+		    tradeResponseDTO.setHistory4Hour(respArr);
+		    
+		    respArr= new ArrayList<>();
+		    respArr.add(tradeHistoryResDTO.getBuy1Day());
+		    respArr.add(tradeHistoryResDTO.getSell1Day());
+		    tradeResponseDTO.setHistory1Day(respArr);
+		}
+	    
+		return tradeResponseDTO;
 	}
 	
 }

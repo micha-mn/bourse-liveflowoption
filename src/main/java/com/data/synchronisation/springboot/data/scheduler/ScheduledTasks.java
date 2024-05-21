@@ -50,7 +50,7 @@ public class ScheduledTasks {
         this.enaTrackingRepository = enaTrackingRepository;
     }
 	
-	/*
+	
 	
 	@Scheduled(fixedRate = 30000 ) // 20000   300000
 	public void syncCurrencyPrice() {
@@ -98,7 +98,7 @@ public class ScheduledTasks {
 		}
 		
 	}
-	*/
+	
 	
 	
 	@Scheduled(fixedRate = 20000)  // 20000   300000

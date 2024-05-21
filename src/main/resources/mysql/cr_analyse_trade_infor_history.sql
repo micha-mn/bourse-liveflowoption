@@ -1,4 +1,3 @@
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `cr_analyse_trade_infor_history`(IN currencyCode VARCHAR(255))
 BEGIN
         if currencyCode = 'ENA' then
@@ -15,7 +14,6 @@ BEGIN
         set next_val = next_val+1;
         update cr_ena_tracking_table
         set LAST_HISTORICAL_DATA_ID = (select max(ID) from bourse.cr_ena_trade_history_info);
-       --  truncate bourse.cr_ena_trade_history_info;
+       truncate bourse.cr_ena_trade_history_info;
         end if ;      
- END$$
-DELIMITER ;
+ END

@@ -181,6 +181,7 @@ function drawGraph() {
 				        const borderColor = isSupport ? "#FF0000" : "#00E396";
 				        let labelText = isSupport ? `support ${subKey.slice(-1)}` : `resistant ${subKey.slice(-1)}`;
 				
+				        /*
 				        if (isSupport) {
 				          // For support, invert the order of values
 				          if (value === maxVal) {
@@ -200,6 +201,7 @@ function drawGraph() {
 				            labelText += " Farthest";
 				          }
 				        }
+				        */
 				       if (!isNaN(value))
 				        yannotation.push({
 				          y: value,
@@ -504,7 +506,7 @@ function testgraph(){
 }
 function drawPieChart(date){
 	const dataParams = {
-						"currencyCode": 'ENA',
+						"currencyCode": 'ENNA',
 						"datePoint":timestampToDate(date),
 						"intervals":""
 				};
@@ -522,14 +524,8 @@ function drawPieChart(date){
 		timeout: 600000,
 		success: function(data) {
 			console.log(data);
-		    historyDataArray={
-				data15Min:data,
-				data30Min:data,
-				data45Min:data,
-				data1Hour:data,
-				data1Day:data,
-			};
-			const numbersAsFloat = historyDataArray.data15Min.map(num => parseFloat(num));
+		    historyDataArray=data;
+			const numbersAsFloat = historyDataArray.history15Min.map(num => parseFloat(num));
 			updatePieChart(numbersAsFloat);
 		    
 			},

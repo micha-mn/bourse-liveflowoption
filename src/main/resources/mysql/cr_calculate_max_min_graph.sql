@@ -55,7 +55,7 @@ SET SESSION sql_mode = '';
 						          ,min(refer_date) refer_date_from
 						          ,max(refer_date) refer_date_to
 					          FROM ( SELECT x.*,
-                                            FLOOR(@i:=@i+1/period)*period i 
+                                            FLOOR(@i:=@i+1/50)*50 i 
 							          FROM CR_ena x, 
                                       (SELECT @i:=0) vars
 							   where x.refer_date between @last_date_min_max_executed and toDate
@@ -64,7 +64,9 @@ SET SESSION sql_mode = '';
                              -- where x.refer_date >= @last_date_min_max_executed
 							ORDER BY refer_date) n 
 							GROUP BY i
-						)tab1,(SELECT @rownum := (select next_val from cr_ena_max_min_SEQ)) r;
+						)tab1,(SELECT @rownum := (select next_val from cr_ena_max_min_SEQ)) r
+                        order by refer_date_to desc
+                        limit 3;
                         
                         update cr_ena_max_min_SEQ set next_val = (select coalesce(max(id),0) + 1 from cr_ena_max_min);
                         

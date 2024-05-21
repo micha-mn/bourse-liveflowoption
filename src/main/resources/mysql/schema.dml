@@ -260,3 +260,54 @@ CREATE TABLE cr_ena_trade_history_analysis (
  create table cr_ena_trade_history_analysis_SEQ (next_val bigint);
  create table Trade_History_ResDTO(id varchar(255) not null, buy varchar(255), sell varchar(255), primary key (id));
  
+ /*--ETHFI start----*/
+CREATE TABLE `cr_ethfi_tracking_table` (
+  `id` bigint NOT NULL,
+  `last_date_min_max_executed` datetime DEFAULT NULL,
+  `not_executed_min_max_price` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `last_historical_data_id` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+create table cr_ethfi_tracking_table_SEQ (next_val bigint);
+
+CREATE TABLE cr_ethfi_trade_history_analysis (
+		  id bigint NOT NULL,
+		  BUY_QTY varchar(1000),
+          SELL_QTY varchar(1000),
+          DIFF_SELL_BUY_QTY varchar(1000),
+          FROM_TIME datetime,
+          TO_TIME   datetime,
+		  PRIMARY KEY (id)
+);
+create table CR_ethfi_TRADE_HISTORY_INFO_SEQ (next_val bigint) ;
+
+
+CREATE TABLE `cr_ethfi_max_min` (
+  `id` bigint NOT NULL,  
+  `max_price` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `refer_date_max` datetime DEFAULT NULL,
+  `refer_date_max_timeStamp` INT(11) DEFAULT NULL,  
+  `min_price` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `refer_date_min` datetime DEFAULT NULL,
+  `refer_date_min_timeStamp` INT(11) DEFAULT NULL,  
+  `refer_date_from` datetime DEFAULT NULL,
+  `refer_date_to` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+Create table cr_ethfi_max_min_SEQ (next_val bigint); 
+
+CREATE TABLE cr_ethfi_trade_analysis (
+		  id bigint NOT NULL,
+		  BUY_QTY varchar(1000),
+          SELL_QTY varchar(1000),
+          DIFF_SELL_BUY_QTY varchar(1000),
+          FROM_TIME datetime,
+          TO_TIME   datetime,
+		  PRIMARY KEY (id)
+);
+ create table cr_ethfi_trade_analysis_SEQ (next_val bigint); 
+ 
+ /*--ETHFI END----*/
+ 
