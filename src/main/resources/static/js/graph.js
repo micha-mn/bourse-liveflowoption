@@ -10,6 +10,23 @@ fromDate = new Date(fromDate.setHours(fromDate.getHours() - 1));
  setTimeInputs('date2', toDate); 
  
 $(document).ready(function() {
+	
+	 var url = "/tablename";
+	   var source =
+    {
+        datatype: "json",
+        datafields: [
+            { name: 'tableName' },
+            { name: 'description' }
+        ],
+        url: url,
+        async: true
+    };
+     var dataAdapter = new $.jqx.dataAdapter(source);
+    // Create a jqxDropDownList
+    $("#currencyDropDown").jqxDropDownList({ selectedIndex: 2, source: dataAdapter, displayMember: "description", valueMember: "tableName", width: 200, height: 40,
+    });
+	
 	$("#dateFrom").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '100%', height: '40px' });
 	$("#dateTo").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '100%', height: '40px' });
 
