@@ -53,16 +53,20 @@ button.bck-frw-style {
     font-size: small;
 }
 .nav-tabs .nav-link {
-    height: 55px;
+    height: 30px;
     padding: 0.2rem .2rem;
+    margin-right: .2rem;
     }
 </style>
 </head>
 <body class="bg-white">
 	<div class="mt-2 p-0" style="margin: 10rem;">
 		<div class="form-group mb-0">
-			
-			<div class="col-4">
+			<div>
+				<label>Currency</label>
+				<div id='currencyDropDown'></div>
+			</div>			
+		    <div class="col-4">
 				<div class="d-flex justify-content-between">
 				<label>From Date</label>
 				<div class="d-flex">
@@ -170,8 +174,8 @@ button.bck-frw-style {
 			<button onclick="drawGraph()" class=" col-1 btn btn-primary">Draw</button>
 			
 		</div>
-		<div class="col-12 d-flex">
-				<div class="col-9 d-flex">
+		<div class="col-12 d-flex pl-0">
+				<div class="col-9 d-flex pl-0">
 					<div class="col-3 d-flex p-0">
 						<button onclick="changeDate('from', 'back', 'hour')"  class="bck-frw-style">Back 1
 							H</button>
@@ -192,7 +196,7 @@ button.bck-frw-style {
 					</div>
 					<br>
 				</div>
-				<div  class="col-3">
+				<div  class="col-4">
 					<div class="nav nav-tabs" id="nav-tab" role="tablist">
 				        <button class="nav-link active" id="nav-15min-tab" data-bs-toggle="tab" data-bs-target="#nav-15min" type="button" role="tab" aria-controls="nav-15min" aria-selected="true" onclick="updatePieChartTime('history15Min')">15 Min</button>
 				        <button class="nav-link" id="nav-30min-tab" data-bs-toggle="tab" data-bs-target="#nav-30min" type="button" role="tab" aria-controls="nav-30min" aria-selected="false" onclick="updatePieChartTime('history30Min')">30 Min</button>
@@ -206,9 +210,9 @@ button.bck-frw-style {
 				    </div>
 				</div>
 			</div>
-		<div class="col-12 d-flex">
-			<div  class="col-9"><div id="chart"></div></div>
-			<div class="col-3">
+		<div class="col-12 d-flex  pl-0">
+			<div  class="col-9  pl-0"><div id="chart"></div></div>
+			<div class="col-4">
 				<div id="pie-chart"></div>
 			</div>
 		</div>
@@ -224,6 +228,10 @@ button.bck-frw-style {
 
 	<script type="text/javascript" src="/js/jqwidgets/jqxcore.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxdata.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxbuttons.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxscrollbar.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxlistbox.js"></script>
+	<script type="text/javascript" src="/js/jqwidgets/jqxdropdownlist.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxdatetimeinput.js"></script>
 	<script type="text/javascript" src="/js/jqwidgets/jqxcalendar.js"></script>
  
