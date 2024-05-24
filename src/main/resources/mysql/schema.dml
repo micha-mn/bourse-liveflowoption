@@ -311,3 +311,9 @@ CREATE TABLE cr_ethfi_trade_analysis (
  
  /*--ETHFI END----*/
  
+ALTER TABLE cr_ethfi_tracking_table
+ADD last_historical_data_date_executed datetime DEFAULT NULL;
+
+ALTER TABLE cr_ena_tracking_table
+ADD last_historical_data_date_executed datetime DEFAULT NULL;
+ 

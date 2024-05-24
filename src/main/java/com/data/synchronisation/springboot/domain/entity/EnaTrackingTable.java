@@ -46,5 +46,7 @@ public class EnaTrackingTable {
     private String lastHistoricalDataId;
 	@Column(name = "LAST_DATE_MIN_MAX_EXECUTED")
     private LocalDateTime lastDateMinMaxExecuted;
+	@Column(name = "LAST_HISTORICAL_DATA_DATE_EXECUTED")
+    private LocalDateTime lastHistoricalDataDateExecuted;
 	
 }

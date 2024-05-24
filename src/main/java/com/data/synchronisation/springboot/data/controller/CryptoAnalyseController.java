@@ -54,10 +54,12 @@ public class CryptoAnalyseController {
 		return ResponseEntity.ok(cryptoAnalyseService.getTableNameEnum());
 	}
 
+	/*
 	@PostMapping("/insertData")
 	public boolean insertData(@RequestBody DataDTO dataDTO) {
 		return cryptoAnalyseService.insertIntoTable(dataDTO);
 	}
+	*/
 
 	@GetMapping("/getdata/{tableName}")
 	public ResponseEntity<List<DataDTO>> getData(@PathVariable("tableName") String tableName) {

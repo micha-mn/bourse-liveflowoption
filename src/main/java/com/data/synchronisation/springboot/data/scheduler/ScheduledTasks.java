@@ -1,6 +1,8 @@
 package com.data.synchronisation.springboot.data.scheduler;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,7 +55,7 @@ public class ScheduledTasks {
 	
 	
 	@Scheduled(fixedRate = 30000 ) // 20000   300000
-	public void syncCurrencyPrice() {
+	public void syncLiveCurrencyPrice() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -88,7 +90,7 @@ public class ScheduledTasks {
 	  		        		  entity,
 	  		        		  PriceCryptoRespDTO[].class);
 	    	
-	    	cryptoAnalyseService.scheduledServiceCurrencyDataSynchronization(response.getBody());
+	    	cryptoAnalyseService.saveLivePrices(response.getBody());
 	    	
 	    	
 	   
@@ -96,9 +98,11 @@ public class ScheduledTasks {
 	    }catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
-	
+	@Scheduled(fixedRate = 30000 ) // 20000   300000
+	public void syncMaxMinBorders() {
+		cryptoAnalyseService.syncMaxMinBorders();
+	}
 	
 	
 	@Scheduled(fixedRate = 20000)  // 20000   300000
@@ -115,14 +119,19 @@ public class ScheduledTasks {
 	    	enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
 	    	String marketCapUrl = "https://api.binance.com/api/v3/historicalTrades?symbol=ENAUSDT&limit=5000";
 			String lastHistoricalDataId = null;
+			LocalDateTime lastHistoricalDataDateExecuted = null;
+			Long diffInMinutes = 0L;
 			if(enaTrackingOpt.isPresent())
 			{
 				enaTracking = enaTrackingOpt.get();
 				if(enaTracking.getLastHistoricalDataId() != null) {
+					diffInMinutes = enaTracking.getLastHistoricalDataDateExecuted().until(LocalDateTime.now(), ChronoUnit.MINUTES);
+					// ldt1.until(ldt2, ChronoUnit.HOURS));
+					if(diffInMinutes<10) {
 					lastHistoricalDataId = enaTracking.getLastHistoricalDataId();
 					marketCapUrl = marketCapUrl +"&fromId="+lastHistoricalDataId;
+					}
 				}
-				
 			}
 	    	// https://api.binance.com/api/v3/historicalTrades?symbol=ETHUSDT&fromId=1423720033&limit=5000
 		    	
