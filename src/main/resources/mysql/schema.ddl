@@ -30,5 +30,7 @@ insert into cr_doge_seq value(1);
 
 
  /*--ETHFI start----*/
-
+insert into cr_ethfi_trade_history_analysis_SEQ  value(1);
+insert into CR_ETHFI_TRADE_HISTORY_INFO_seq  value(1);
+insert into cr_ethfi_tracking_table_SEQ value(1);
  /*--ETHFI end----*/

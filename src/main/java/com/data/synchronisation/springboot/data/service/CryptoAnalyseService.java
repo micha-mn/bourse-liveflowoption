@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.data.synchronisation.springboot.data.dto.CurrencyDTO;
 import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
 import com.data.synchronisation.springboot.data.dto.DataDTO;
 import com.data.synchronisation.springboot.data.dto.GraphDataReqDTO;
@@ -48,6 +49,7 @@ import com.data.synchronisation.springboot.domain.entity.EnaTradeHistoryInfo;
 import com.data.synchronisation.springboot.domain.entity.EnaTradeInfo;
 import com.data.synchronisation.springboot.domain.entity.Eth;
 import com.data.synchronisation.springboot.domain.entity.EthFITrackingTable;
+import com.data.synchronisation.springboot.domain.entity.EthFITradeHistoryInfo;
 import com.data.synchronisation.springboot.domain.entity.EthFi;
 import com.data.synchronisation.springboot.domain.entity.Floki;
 import com.data.synchronisation.springboot.domain.entity.Pepe;
@@ -121,23 +123,24 @@ public class CryptoAnalyseService {
 			                    EthFITrackingRepository ethFITrackingRepository,
 			                    EthFITradeHistoryInfoRepository ethFITradeHistoryInfoRepository) {
 		
-		this.ethFiRepository            = ethFiRepository;
-		this.enaRepository              = enaRepository;
-		this.wRepository                = wRepository;
-		this.dogeRepository             = dogeRepository;
-		this.sagaRepository             = sagaRepository;
-		this.btcRepository              = btcRepository;
-		this.bnbRepository              = bnbRepository;
-		this.ethRepository              = ethRepository;
-		this.pepeRepository             = pepeRepository;
-		this.flokiRepository            = flokiRepository;
-		this.enaInfoRepository          = enaInfoRepository;
-		this.wInfoRepository            = wInfoRepository;
-		this.enaTradeInfoRepository     = enaTradeInfoRepository;
-		this.wTradeInfoRepository       = wTradeInfoRepository;
-		this.enaTrackingRepository      = enaTrackingRepository;
-		this.enaTradeHistoryInfoRepository = enaTradeHistoryInfoRepository;
-		this.ethFITrackingRepository       = ethFITrackingRepository;
+		this.ethFiRepository                 = ethFiRepository;
+		this.enaRepository                   = enaRepository;
+		this.wRepository                     = wRepository;
+		this.dogeRepository                  = dogeRepository;
+		this.sagaRepository                  = sagaRepository;
+		this.btcRepository                   = btcRepository;
+		this.bnbRepository                   = bnbRepository;
+		this.ethRepository                   = ethRepository;
+		this.pepeRepository                  = pepeRepository;
+		this.flokiRepository                 = flokiRepository;
+		this.enaInfoRepository               = enaInfoRepository;
+		this.wInfoRepository                 = wInfoRepository;
+		this.enaTradeInfoRepository          = enaTradeInfoRepository;
+		this.wTradeInfoRepository            = wTradeInfoRepository;
+		this.enaTrackingRepository           = enaTrackingRepository;
+		this.enaTradeHistoryInfoRepository   = enaTradeHistoryInfoRepository;
+		this.ethFITrackingRepository         = ethFITrackingRepository;
+		this.ethFITradeHistoryInfoRepository = ethFITradeHistoryInfoRepository;
 	}
 	
 	
@@ -546,7 +549,7 @@ public class CryptoAnalyseService {
 	}
 	
   public void saveHistoryTradeInfo(TradeInfoDTO[] dataLst,String currrency) {
-		if(currrency.equalsIgnoreCase("ENA")) {
+		if(currrency.equalsIgnoreCase("ENNA")) {
 			EnaTradeHistoryInfo enaTradeHistoryInfo = EnaTradeHistoryInfo.builder().build();
 			List<EnaTradeHistoryInfo> enaTradeHistoryInfoLst = new ArrayList<EnaTradeHistoryInfo>();
 			long test_timestamp ;
@@ -571,7 +574,33 @@ public class CryptoAnalyseService {
 			
 			enaTradeHistoryInfoLst = enaTradeHistoryInfoLst.stream().distinct().collect(Collectors.toList());
 			enaTradeHistoryInfoRepository.saveAll(enaTradeHistoryInfoLst);
-		}
+		} else
+			if(currrency.equalsIgnoreCase("ETHFI")) {
+				EthFITradeHistoryInfo   ethFITradeHistoryInfo = EthFITradeHistoryInfo.builder().build();
+				List<EthFITradeHistoryInfo> ethFITradeHistoryInfoLst = new ArrayList<EthFITradeHistoryInfo>();
+				long test_timestamp ;
+				LocalDateTime triggerTime ;
+				
+				for(int i=0;i<dataLst.length;i++) {
+					test_timestamp = Long.valueOf(dataLst[i].getTime());
+					triggerTime =
+					        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
+					                                TimeZone.getDefault().toZoneId()); 
+					ethFITradeHistoryInfo = EthFITradeHistoryInfo.builder()
+							.id(dataLst[i].getId())
+							.isBestMatch(dataLst[i].getIsBestMatch())
+							.isBuyerMaker(dataLst[i].isBuyerMaker())
+							.price(dataLst[i].getPrice())
+							.qty(dataLst[i].getQty())
+							.quoteQty(dataLst[i].getQuoteQty())
+							.time(triggerTime)
+							.build();
+					ethFITradeHistoryInfoLst.add(ethFITradeHistoryInfo);
+				}
+				
+				ethFITradeHistoryInfoLst = ethFITradeHistoryInfoLst.stream().distinct().collect(Collectors.toList());
+				ethFITradeHistoryInfoRepository.saveAll(ethFITradeHistoryInfoLst);
+		} 
 	     else
 			if(currrency.equalsIgnoreCase("W")) {
 				WTradeInfo   wTradeInfo = WTradeInfo.builder().build();
@@ -587,6 +616,25 @@ public class CryptoAnalyseService {
   
   
 	public EnaTradeInfo buildEnaTradeInfoEntity(TradeInfoDTO data) {
+		long test_timestamp = Long.valueOf(data.getTime());
+		LocalDateTime triggerTime =
+		        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
+		                                TimeZone.getDefault().toZoneId()); 
+		
+		EnaTradeInfo enaTradeInfo = EnaTradeInfo.builder().build();
+		enaTradeInfo = EnaTradeInfo.builder()
+				.id(data.getId())
+				.isBestMatch(data.getIsBestMatch())
+				.isBuyerMaker(data.isBuyerMaker())
+				.price(data.getPrice())
+				.qty(data.getQty())
+				.quoteQty(data.getQuoteQty())
+				.time(triggerTime)
+				.build();
+		return enaTradeInfo;
+	}
+	
+	public EnaTradeInfo buildEthFITradeInfoEntity(TradeInfoDTO data) {
 		long test_timestamp = Long.valueOf(data.getTime());
 		LocalDateTime triggerTime =
 		        LocalDateTime.ofInstant(Instant.ofEpochMilli(test_timestamp), 
@@ -800,5 +848,22 @@ public class CryptoAnalyseService {
 	    
 		return tradeResponseDTO;
 	}
+    
+    public List<CurrencyDTO> getCurrencyList(){
+    	
+    	List<CurrencyDTO> lst = new ArrayList<CurrencyDTO>();
+    	CurrencyDTO dto = CurrencyDTO.builder().id(1)
+    			.symbol("ENNA")
+    			.name("ENNA")
+    			.build();
+    	lst.add(dto);
+    	
+    	dto = CurrencyDTO.builder().id(2)
+    			.symbol("ETHFI")
+    			.name("ETHFI")
+    			.build();
+    	lst.add(dto);
+    	return lst;
+    }
 	
 }

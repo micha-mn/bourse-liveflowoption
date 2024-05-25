@@ -25,15 +25,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor
 @Entity
-@Table(name = "cr_ena_trade_history_info")
+@Table(name = "cr_ethfi_trade_history_info")
 public class EthFITradeHistoryInfo {
 	@Id
-	 @GeneratedValue(generator = "CR_ENA_TRADE_HISTORY_INFO_SEQ")
+	 @GeneratedValue(generator = "CR_ethfi_TRADE_HISTORY_INFO_SEQ")
 	 @GenericGenerator(
-	      name = "CR_ENA_TRADE_HISTORY_INFO_SEQ",
+	      name = "CR_ethfi_TRADE_HISTORY_INFO_SEQ",
 	      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
 	      parameters = {
-	        @Parameter(name = "sequence_name", value = "CR_ENA_TRADE_HISTORY_INFO_SEQ"),
+	        @Parameter(name = "sequence_name", value = "CR_ethfi_TRADE_HISTORY_INFO_SEQ"),
 	        @Parameter(name = "initial_value", value = "1"),
 	        @Parameter(name = "increment_size", value = "1")
 	        }

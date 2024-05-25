@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.data.synchronisation.springboot.data.dto.CurrencyDTO;
 import com.data.synchronisation.springboot.data.dto.DataDTO;
 import com.data.synchronisation.springboot.data.dto.GraphDataReqDTO;
 import com.data.synchronisation.springboot.data.dto.GraphFulllResponseDTO;
@@ -93,6 +94,13 @@ public class CryptoAnalyseController {
 	public ResponseEntity<TradeResponseDTO> getTradeHistory(@RequestBody TradeReqDTO req) {
 		
 		TradeResponseDTO resp = cryptoAnalyseService.getTradeHistory(req);
+		return new ResponseEntity<>(resp,HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "data/currency/list")
+	public ResponseEntity<List<CurrencyDTO>> getCurrencyList() {
+		
+		List<CurrencyDTO> resp = cryptoAnalyseService.getCurrencyList();
 		return new ResponseEntity<>(resp,HttpStatus.OK);
 	}
 }

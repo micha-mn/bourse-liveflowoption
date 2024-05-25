@@ -9,7 +9,7 @@ BEGIN
 DECLARE sqlTxt varchar(255);
 SET GLOBAL sql_mode = '';
 SET SESSION sql_mode = '';  
-
+insert into cr_debug_data_for_graph_table values(cryptoCurrency,fromDate,toDate,period,currencytype);
 if cryptoCurrency='ENNA' then
   if (currencytype = 'NORMAL') then
 	 select id ,UNIX_TIMESTAMP(refer_date) as x,value as y
@@ -26,5 +26,21 @@ if cryptoCurrency='ENNA' then
    end if;
 end if;     
 
-END$$
+if cryptoCurrency='ETHFI' then
+  if (currencytype = 'NORMAL') then
+	 select id ,UNIX_TIMESTAMP(refer_date) as x,value as y
+	  from cr_ethfi
+	  where refer_date between fromDate and toDate;
+  ELSEIF (currencytype ='MAX') then	 
+       select id, refer_date_max_timestamp as x,max_price as y
+         from cr_ethfi_max_min
+       where refer_date_max between fromDate and toDate;
+   ELSEIF currencytype='MIN' then	 
+         select id, refer_date_min_timestamp as x,min_price as y
+           from cr_ethfi_max_min
+          where refer_date_min between fromDate and toDate;
+   end if;
+end if;     
+
+end$$
 DELIMITER ;

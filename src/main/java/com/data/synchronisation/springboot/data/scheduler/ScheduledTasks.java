@@ -29,7 +29,9 @@ import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
 import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
+import com.data.synchronisation.springboot.domain.entity.EthFITrackingTable;
 import com.data.synchronisation.springboot.repositories.EnaTrackingRepository;
+import com.data.synchronisation.springboot.repositories.EthFITrackingRepository;
 import com.google.gson.Gson;
 
 @Component
@@ -42,14 +44,18 @@ public class ScheduledTasks {
     private CryptoAnalyseService cryptoAnalyseService;
 	private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 	private EnaTrackingRepository enaTrackingRepository;
+	private EthFITrackingRepository ethFITrackingRepository;
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-	public ScheduledTasks(RestTemplate restTemplate,CryptoAnalyseService cryptoAnalyseService,
-			EnaTrackingRepository enaTrackingRepository) {
+	public ScheduledTasks(RestTemplate restTemplate,
+			CryptoAnalyseService cryptoAnalyseService,
+			EnaTrackingRepository enaTrackingRepository,
+			EthFITrackingRepository ethFITrackingRepository) {
         this.serviceName = this.getClass().getName();
         this.restTemplate = restTemplate;
         this.cryptoAnalyseService = cryptoAnalyseService;
         this.enaTrackingRepository = enaTrackingRepository;
+        this.ethFITrackingRepository = ethFITrackingRepository;
     }
 	
 	
@@ -114,43 +120,88 @@ public class ScheduledTasks {
 	    
 	    HttpEntity entity = new HttpEntity<>(headers);
 	    try {
-	    	Optional<EnaTrackingTable> enaTrackingOpt ;
-	    	EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
-	    	enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
-	    	String marketCapUrl = "https://api.binance.com/api/v3/historicalTrades?symbol=ENAUSDT&limit=5000";
-			String lastHistoricalDataId = null;
-			LocalDateTime lastHistoricalDataDateExecuted = null;
-			Long diffInMinutes = 0L;
-			if(enaTrackingOpt.isPresent())
-			{
-				enaTracking = enaTrackingOpt.get();
-				if(enaTracking.getLastHistoricalDataId() != null) {
-					diffInMinutes = enaTracking.getLastHistoricalDataDateExecuted().until(LocalDateTime.now(), ChronoUnit.MINUTES);
-					// ldt1.until(ldt2, ChronoUnit.HOURS));
-					if(diffInMinutes<10) {
-					lastHistoricalDataId = enaTracking.getLastHistoricalDataId();
-					marketCapUrl = marketCapUrl +"&fromId="+lastHistoricalDataId;
-					}
-				}
-			}
-	    	// https://api.binance.com/api/v3/historicalTrades?symbol=ETHUSDT&fromId=1423720033&limit=5000
-		    	
-		    	
-		    	ResponseEntity<TradeInfoDTO[]> response =
-		  		          restTemplate.exchange(
-		  		        		marketCapUrl,
-		  		        		  HttpMethod.GET,
-		  		        		  entity,
-		  		        		TradeInfoDTO[].class);
-		    	//cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
-		    	TradeInfoDTO[] responselst = response.getBody();
-		    	cryptoAnalyseService.saveHistoryTradeInfo(responselst,"ENA");
-		    	
-		    	
-		    	StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history");
-		   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
-		   		query.setParameter("currencyCode","ENA" );
-		   		query.execute();
+	    	List<String> currList = new ArrayList<String>();
+	    	currList.add(0, "ENNA");
+	    	currList.add(0, "ETHFI");
+	    	
+	    	currList.forEach(crypto -> {
+	    		    if(crypto.equals("ENNA")) {
+				    		Optional<EnaTrackingTable> enaTrackingOpt ;
+					    	EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
+					    	enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
+					    	String historyTradeUrl = "https://api.binance.com/api/v3/historicalTrades?symbol=ENAUSDT&limit=5000";
+							String lastHistoricalDataId = null;
+							LocalDateTime lastHistoricalDataDateExecuted = null;
+							Long diffInMinutes = 0L;
+							if(enaTrackingOpt.isPresent())
+							{
+								enaTracking = enaTrackingOpt.get();
+								if(enaTracking.getLastHistoricalDataId() != null && enaTracking.getLastHistoricalDataDateExecuted() != null) {
+									diffInMinutes = enaTracking.getLastHistoricalDataDateExecuted().until(LocalDateTime.now(), ChronoUnit.MINUTES);
+									// ldt1.until(ldt2, ChronoUnit.HOURS));
+									if(diffInMinutes<10) {
+									lastHistoricalDataId = enaTracking.getLastHistoricalDataId();
+									historyTradeUrl = historyTradeUrl +"&fromId="+lastHistoricalDataId;
+									}
+								}
+							}	
+					    	ResponseEntity<TradeInfoDTO[]> response =
+					  		          restTemplate.exchange(
+					  		        		historyTradeUrl,
+					  		        		  HttpMethod.GET,
+					  		        		  entity,
+					  		        		TradeInfoDTO[].class);
+					    	//cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
+					    	TradeInfoDTO[] responselst = response.getBody();
+					    	cryptoAnalyseService.saveHistoryTradeInfo(responselst,"ENA");
+					    	
+					    	
+					    	StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history");
+					   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
+					   		query.setParameter("currencyCode","ENNA" );
+					   		query.execute();
+				    		}
+	    		    
+	    		    if(crypto.equals("ETHFI")) {
+			    		Optional<EthFITrackingTable> ethFITrackingOpt ;
+				    	EthFITrackingTable ethTracking = EthFITrackingTable.builder().build();
+				    	ethFITrackingOpt = ethFITrackingRepository.findById(Long.valueOf("1"));
+				    	String historyTradeUrl = "https://api.binance.com/api/v3/historicalTrades?symbol=ETHFIUSDT&limit=5000";
+						String lastHistoricalDataId = null;
+						LocalDateTime lastHistoricalDataDateExecuted = null;
+						Long diffInMinutes = 0L;
+						if(ethFITrackingOpt.isPresent())
+						{
+							ethTracking = ethFITrackingOpt.get();
+							if(ethTracking.getLastHistoricalDataId() != null && ethTracking.getLastHistoricalDataDateExecuted()!= null) {
+								diffInMinutes = ethTracking.getLastHistoricalDataDateExecuted().until(LocalDateTime.now(), ChronoUnit.MINUTES);
+								// ldt1.until(ldt2, ChronoUnit.HOURS));
+								if(diffInMinutes<10) {
+								lastHistoricalDataId = ethTracking.getLastHistoricalDataId();
+								historyTradeUrl = historyTradeUrl +"&fromId="+lastHistoricalDataId;
+								}
+							}
+						}	
+				    	ResponseEntity<TradeInfoDTO[]> response =
+				  		          restTemplate.exchange(
+				  		        		historyTradeUrl,
+				  		        		  HttpMethod.GET,
+				  		        		  entity,
+				  		        		TradeInfoDTO[].class);
+				    	//cryptoAnalyseService.scheduledServiceDataSynchronization(response.getBody());
+				    	TradeInfoDTO[] responselst = response.getBody();
+				    	cryptoAnalyseService.saveHistoryTradeInfo(responselst,"ETHFI");
+				    	
+				    	
+				    	StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_analyse_trade_infor_history");
+				   		query.registerStoredProcedureParameter("currencyCode", String.class, ParameterMode.IN);
+				   		query.setParameter("currencyCode","ETHFI" );
+				   		query.execute();
+			    		}
+    		
+	    		
+	    	});
+	    	
 		    	
 		   		
 		   		/*
