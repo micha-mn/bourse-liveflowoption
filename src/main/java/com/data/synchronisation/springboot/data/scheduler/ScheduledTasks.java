@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
@@ -24,7 +23,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.data.synchronisation.springboot.data.dto.CurrencyInfoDTO;
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
@@ -61,7 +59,7 @@ public class ScheduledTasks {
 	
 	
 	@Scheduled(fixedRate = 30000 ) // 20000   300000
-	public void syncLiveCurrencyPrice() {
+	public void syncLiveCurrencyPriceANdCalculateMinMax() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -96,6 +94,7 @@ public class ScheduledTasks {
 	  		        		  entity,
 	  		        		  PriceCryptoRespDTO[].class);
 	    	
+	    	// save live prices and caclulate min max
 	    	cryptoAnalyseService.saveLivePrices(response.getBody());
 	    	
 	    	
@@ -104,10 +103,6 @@ public class ScheduledTasks {
 	    }catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	@Scheduled(fixedRate = 30000 ) // 20000   300000
-	public void syncMaxMinBorders() {
-		cryptoAnalyseService.syncMaxMinBorders();
 	}
 	
 	

@@ -238,110 +238,15 @@ public class CryptoAnalyseService {
 	       return true;
 	}
 	
+	
+	
 	public boolean saveLivePrices(PriceCryptoRespDTO[] dataLst) {
-		/*
-		PriceCryptoRespDTO data = PriceCryptoRespDTO.builder().build();
-		int checkTrackingCnt = 0;
-		for(int i =0;i<dataLst.length; i++) {
-			data = dataLst[i];
-			if(data.getSymbol().equalsIgnoreCase("ENAUSDT")) {
-				LocalDateTime enaInsertTime = LocalDateTime.now();
-				enaInsertTime = LocalDateTime.now();
-				Ena ena = Ena.builder().referDate(enaInsertTime).value(data.getPrice()).build();
-				enaRepository.save(ena);
-			}else
-				if(data.getSymbol().equalsIgnoreCase("WUSDT")) {
-					W w = W.builder().referDate(LocalDateTime.now())
-							.value(data.getPrice())
-							.build();
-					wRepository.save(w);
-				}else
-				if(data.getSymbol().equalsIgnoreCase("DOGEUSDT")) {
-					Doge doge = Doge.builder().referDate(LocalDateTime.now())
-							.value(data.getPrice())
-							.build();
-					dogeRepository.save(doge);
-				}else
-					if(data.getSymbol().equalsIgnoreCase("SAGAUSDT")) {
-						Saga saga = Saga.builder().referDate(LocalDateTime.now())
-								.value(data.getPrice())
-								.build();
-						sagaRepository.save(saga);
-					}else
-						if(data.getSymbol().equalsIgnoreCase("BTCUSDT")) {
-							Btc btc = Btc.builder().referDate(LocalDateTime.now())
-									.value(data.getPrice())
-									.build();
-							btcRepository.save(btc);
-						}
-						else
-							if(data.getSymbol().equalsIgnoreCase("BNBUSDT")) {
-								Bnb bnb = Bnb.builder().referDate(LocalDateTime.now())
-										.value(data.getPrice())
-										.build();
-								bnbRepository.save(bnb);
-							}else
-								if(data.getSymbol().equalsIgnoreCase("ETHUSDT")) {
-									Eth eth = Eth.builder().referDate(LocalDateTime.now())
-											.value(data.getPrice())
-											.build();
-									ethRepository.save(eth);
-								}else
-									if(data.getSymbol().equalsIgnoreCase("PEPEUSDT")) {
-										Pepe pepe = Pepe.builder().referDate(LocalDateTime.now())
-												.value(data.getPrice())
-												.build();
-										pepeRepository.save(pepe);
-									}else
-										if(data.getSymbol().equalsIgnoreCase("FLOKIUSDT")) {
-											Floki floki = Floki.builder().referDate(LocalDateTime.now())
-													.value(data.getPrice())
-													.build();
-											flokiRepository.save(floki);
-										}
-		}
-		
-		*/
-		
-		
-		
-		
-		   buildEntityObjectAndInsert(dataLst);
+		   saveLivePricesAndCaclulateMinMAx(dataLst);
 	       return true;
 	}
 	
-	public void syncMaxMinBorders() {
-		
-		if(1 == 1) {
-				int checkTrackingCnt = 0;
-				Optional<EnaTrackingTable> enaTrackingOpt ;
-				EnaTrackingTable enaTracking = EnaTrackingTable.builder().build();
-				enaTrackingOpt = enaTrackingRepository.findById(Long.valueOf("1"));
-				enaTracking = enaTrackingOpt.get();
-				checkTrackingCnt = Integer.parseInt(enaTracking.getNotExecutedMinMaxPrice());
-				if(checkTrackingCnt > 10) {
-					// call procedure
-					StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_calculate_max_min_graph");
-			   		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
-			   		query.setParameter("cryptoCurrency","ENNA" );
-			   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
-			   		query.setParameter("fromDate",enaTracking.getLastDateMinMaxExecuted() );
-			   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
-			   		query.setParameter("toDate",LocalDateTime.now() );
-			   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
-			   		query.setParameter("period", "10" );
-			   		query.execute();
-				}else {
-					enaTracking.setNotExecutedMinMaxPrice(
-							String.valueOf(Integer.parseInt(enaTracking.getNotExecutedMinMaxPrice())+1)
-							);
-					// enaTracking.setLastDateMinMaxExecuted(LocalDateTime.now());
-					enaTrackingRepository.save(enaTracking);
-				}
-		}
-	}
 	
-	public void buildEntityObjectAndInsert(PriceCryptoRespDTO[] dataLst) {
+	public void saveLivePricesAndCaclulateMinMAx(PriceCryptoRespDTO[] dataLst) {
 		PriceCryptoRespDTO data = PriceCryptoRespDTO.builder().build();
 		int checkTrackingCnt = 0;
 		for(int i =0;i<dataLst.length; i++) {
