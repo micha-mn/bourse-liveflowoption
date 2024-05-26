@@ -11,20 +11,20 @@ fromDate = new Date(fromDate.setHours(fromDate.getHours() - 1));
  
 $(document).ready(function() {
 	
-	 var url = "/tablename";
+	 var url = "/data/currency/list";
 	   var source =
     {
         datatype: "json",
         datafields: [
-            { name: 'tableName' },
-            { name: 'description' }
+            { name: 'symbol' },
+            { name: 'name' }
         ],
         url: url,
         async: true
     };
      var dataAdapter = new $.jqx.dataAdapter(source);
     // Create a jqxDropDownList
-    $("#currencyDropDown").jqxDropDownList({ selectedIndex: 2, source: dataAdapter, displayMember: "description", valueMember: "tableName", width: 200, height: 40,
+    $("#currencyDropDown").jqxDropDownList({ selectedIndex: 0, source: dataAdapter, displayMember: "name", valueMember: "symbol", width: 200, height: 40,
     });
 	
 	$("#dateFrom").jqxDateTimeInput({ formatString: "F", showTimeButton: true, width: '100%', height: '40px' });
@@ -32,7 +32,7 @@ $(document).ready(function() {
 
 	$("#dateFrom").val(fromDate);
 	$("#dateTo").val(toDate);
-	drawGraph();
+	$("#currencyDropDown").on('bindingComplete', function (event) { drawGraph(); });
 
 	updateDateInputs();
 
@@ -88,7 +88,7 @@ function drawGraph() {
 		"fromDate": formatDate($("#dateFrom").val()),
 		"toDate": formatDate($("#dateTo").val()),
 		"dataType": 'normal',
-		"cryptoCurrencyCode": 'ENNA',
+		"cryptoCurrencyCode": $("#currencyDropDown").val(),
 	};
 	$.ajax({
 		type: "POST",
@@ -101,7 +101,7 @@ function drawGraph() {
 						console.log(response);
 
 		dataParams = {
-						"cryptoCurrencyCode": 'ENNA',
+						"cryptoCurrencyCode": $("#currencyDropDown").val(),
 				};
 			$.ajax({
 		type: "POST",
@@ -523,7 +523,7 @@ function testgraph(){
 }
 function drawPieChart(date){
 	const dataParams = {
-						"currencyCode": 'ENNA',
+						"currencyCode": $("#currencyDropDown").val(),
 						"datePoint":timestampToDate(date),
 						"intervals":""
 				};
