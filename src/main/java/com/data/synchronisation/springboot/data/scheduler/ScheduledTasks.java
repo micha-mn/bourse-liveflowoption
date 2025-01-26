@@ -1,5 +1,9 @@
 package com.data.synchronisation.springboot.data.scheduler;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -13,6 +17,7 @@ import javax.persistence.ParameterMode;
 import javax.persistence.PersistenceContext;
 import javax.persistence.StoredProcedureQuery;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -58,7 +63,7 @@ public class ScheduledTasks {
 	
 	
 	
-	@Scheduled(fixedRate = 30000 ) // 20000   300000
+	@Scheduled(fixedRate = 300000 ) // 20000   300000
 	public void syncLiveCurrencyPriceANdCalculateMinMax() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -66,7 +71,10 @@ public class ScheduledTasks {
 	    headers.set("Content-Type", "application/json");
 	    
 	    HttpEntity entity = new HttpEntity<>(headers);
+	    String[] coinGeckoIds = {"bitcoin", "ethereum", "dogecoin", "binancecoin"};
 	    try {
+	    	
+	    	String coinGeckoId = coinGeckoIds[0];
 	    	String url = "https://www.binance.com/api/v3/ticker/price?symbols=";
 	    	List<String> listOfCurrencies=new ArrayList<String>();
 	    	listOfCurrencies.add("BTCUSDT");
@@ -86,7 +94,6 @@ public class ScheduledTasks {
 			System.out.println(levelPattern);
 			List<String> values = new ArrayList<>();
 			
-			
 	    	ResponseEntity<PriceCryptoRespDTO[]> response =
 	  		          restTemplate.exchange(
 	  		        		url,
@@ -104,9 +111,9 @@ public class ScheduledTasks {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	@Scheduled(fixedRate = 20000)  // 20000   300000
+
+    
+	@Scheduled(fixedRate = 200000)  // 20000   300000
 	public void syncHistoricalTradeEnaInfo() {
 		log.info("syncTradeInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		

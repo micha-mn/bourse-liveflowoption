@@ -1,6 +1,9 @@
 package com.data.synchronisation.springboot;
 
 import java.time.Duration;
+import java.util.TimeZone;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,7 +39,12 @@ public class Application {
 	        .setConnectTimeout(Duration.ofMillis(300000)).setReadTimeout(Duration.ofMillis(300000))
 	        .build();
 	  }
-
+	 @PostConstruct
+	    public void init() {
+	        // Set the JVM's default timezone to UTC
+	        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	        System.out.println("Default timezone set to: " + TimeZone.getDefault().getID());
+	    }
 	
 	/* 
     @Bean
