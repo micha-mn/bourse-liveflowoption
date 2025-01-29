@@ -11,13 +11,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.data.synchronisation.springboot.domain.entity.TmpCryBinanceSeconds;
-import com.data.synchronisation.springboot.domain.entity.TmpCryBitcoinSeconds;
+import com.data.synchronisation.springboot.domain.entity.TmpCryBitcoinHighLow;
 import com.data.synchronisation.springboot.domain.entity.TmpCryEthereumSeconds;
 import com.data.synchronisation.springboot.domain.entity.TmpCryShibaSeconds;
 import com.data.synchronisation.springboot.domain.entity.TmpCrySolanaSeconds;
 import com.data.synchronisation.springboot.domain.entity.TmpCryXrpSeconds;
 import com.data.synchronisation.springboot.repositories.TmpCryBinanceSecondsRepository;
-import com.data.synchronisation.springboot.repositories.TmpCryBitcoinSecondsRepository;
+import com.data.synchronisation.springboot.repositories.TmpCryBitcoinHighLowRepository;
 import com.data.synchronisation.springboot.repositories.TmpCryEthereumSecondsRepository;
 import com.data.synchronisation.springboot.repositories.TmpCryShibaSecondsRepository;
 import com.data.synchronisation.springboot.repositories.TmpCrySolanaSecondsRepository;
@@ -49,7 +49,7 @@ public class CryptoDataScheduledTasks {
     private static final String COINGECKO_API_URL = "https://api.coingecko.com/api/v3/coins/markets";
 
     @Autowired
-    TmpCryBitcoinSecondsRepository tmpCryBitcoinSecondsRepository;
+    TmpCryBitcoinHighLowRepository tmpCryBitcoinHighLowRepository;
     @Autowired
     TmpCryEthereumSecondsRepository tmpCryEthereumSecondsRepository;
     @Autowired
@@ -67,20 +67,15 @@ public class CryptoDataScheduledTasks {
     private static final String[] BINANCE_SYMBOLS = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "SHIBUSDT", "BNBUSDT", "XRPUSDT"};
     private static final String[] COINGECKO_SYMBOLS = {"bitcoin", "ethereum", "solana", "shiba-inu", "binancecoin", "ripple"};
 
-    private Map<String, Double> cachedMarketCapData = new HashMap<>();
-    private LocalDateTime lastMarketCapFetchTime = LocalDateTime.now().minusMinutes(1);
 
     
-    @Scheduled(fixedDelay = 5000) // Run every 5 seconds AFTER the last execution completes
-    public void fetchCryptoData() {
+   // @Scheduled(fixedDelay = 5000) // Run every 5 seconds AFTER the last execution completes
+    public void fetchCryptoData(LocalDateTime startTime, LocalDateTime endTime) {
         System.out.println("Fetching data at: " + LocalDateTime.now());
 
 
-        // Check if 1 minute has passed since the last market cap fetch
-        if (Duration.between(lastMarketCapFetchTime, LocalDateTime.now()).toSeconds() >= 60) {
-            cachedMarketCapData = fetchMarketCapData();
-            lastMarketCapFetchTime = LocalDateTime.now();
-        }
+        	Map<String, Double> MarketCapData = fetchMarketCapData();
+        
         
         for (int i = 0; i < BINANCE_SYMBOLS.length; i++) {
             String binanceSymbol = BINANCE_SYMBOLS[i]; // Binance symbol
@@ -99,15 +94,15 @@ public class CryptoDataScheduledTasks {
             LocalDateTime intlStart = intlEnd.minusMinutes(1);
 
             // Fetch OHLC data from Binance
-            Map<String, Object> euroData = fetchKlineData(binanceSymbol, "1m", euroStart, euroEnd);
-            Map<String, Object> intlData = fetchKlineData(binanceSymbol, "1m", intlStart, intlEnd);
+            Map<String, Object> euroData = fetchKlineData(binanceSymbol, "4h", euroStart, euroEnd);
+            Map<String, Object> intlData = fetchKlineData(binanceSymbol, "4h", startTime, endTime);
 
-            Double marketCap = cachedMarketCapData.getOrDefault(coingeckoSymbol, 0.0);
+            Double marketCap = MarketCapData.getOrDefault(coingeckoSymbol, 0.0);
             BigDecimal marketCapValue = BigDecimal.valueOf(marketCap);
             
             if (binanceSymbol.equalsIgnoreCase("BTCUSDT") && !euroData.isEmpty() && !intlData.isEmpty()) {
             	
-            	TmpCryBitcoinSeconds entity = TmpCryBitcoinSeconds.builder()
+            	TmpCryBitcoinHighLow entity = TmpCryBitcoinHighLow.builder()
                         // Save Euro-time OHLC data
             			    .openeur(new BigDecimal(euroData.getOrDefault("open", "0").toString())) // Convert String to BigDecimal
             			    .closeeur(new BigDecimal(euroData.getOrDefault("close", "0").toString()))
@@ -117,13 +112,15 @@ public class CryptoDataScheduledTasks {
             			    .marketcap(marketCapValue) // Remove commas and convert
             			    .openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
             			    .closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString()))
-                        .referDate(nowUtc)
+	                        .startTime(startTime)
+	                        .endTime(endTime)
                         .build();
 
                 // Save entity to the database
-                tmpCryBitcoinSecondsRepository.save(entity);
+            	tmpCryBitcoinHighLowRepository.save(entity);
                 System.out.println("Saved combined data for: " + binanceSymbol);
-            } else if (binanceSymbol.equalsIgnoreCase("ETHUSDT") && !euroData.isEmpty() && !intlData.isEmpty()) {
+            }
+            /*else if (binanceSymbol.equalsIgnoreCase("ETHUSDT") && !euroData.isEmpty() && !intlData.isEmpty()) {
             
             	TmpCryEthereumSeconds entity = TmpCryEthereumSeconds.builder()
                         // Save Euro-time OHLC data
@@ -221,6 +218,7 @@ public class CryptoDataScheduledTasks {
             	tmpCryXrpSecondsRepository.save(entity);
                 System.out.println("Saved combined data for: " + binanceSymbol);
             }
+            */
             else {
                 System.out.println("No data available for: " + binanceSymbol);
             }
@@ -304,42 +302,7 @@ System.out.println("marketCapData -- "+marketCapData);
         // Execute the procedure
         query.execute();
     }
-    @PostConstruct
-    public void runOnStartup() {
-        System.out.println("Running the task immediately after startup.");
-        ZoneId systemZone = ZoneId.systemDefault();
-
-        // Print the system's timezone
-        System.out.println("Current system timezone: " + systemZone);
-
-        // Optionally, you can print the current time in that timezone
-        ZonedDateTime currentTime = ZonedDateTime.now(systemZone);
-        System.out.println("Current time in system timezone: " + currentTime);
-        
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime startTime = now.minusHours(4).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0);
-        String start = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        String end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        
-        LocalDateTime nowUtc = LocalDateTime.now(ZoneId.of("UTC"));
-        System.out.println("nowUtc= "+nowUtc);
-        // Call the stored procedure for this interval
-        System.out.println("START TIME= "+start);
-        System.out.println("END TIME= "+end);
-        System.out.println(" ZonedDateTime.now(); "+ ZonedDateTime.now());
-        System.out.println(" LocalDateTime.now(); "+ LocalDateTime.now());
-        
-        ZonedDateTime nowUtcs = ZonedDateTime.now(ZoneId.of("UTC"));
-        ZonedDateTime euroEndZoned = nowUtcs.withZoneSameInstant(ZoneId.of("CET"));
-        
-        LocalDateTime euroEnd = euroEndZoned.toLocalDateTime();
-        LocalDateTime euroStart = euroEnd.minusMinutes(1);
-        
-       
-        System.out.println(" euroEnd; "+ euroEnd);
-        System.out.println(" euroStart; "+ euroStart);
-    }
+    
     // Scheduled task to run every 4 hours
     @Scheduled(cron = "0 0 */4 * * *") // Runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
     public void schedule4HourIntervals() {
@@ -347,17 +310,20 @@ System.out.println("marketCapData -- "+marketCapData);
         // Calculate the current interval's start and end times
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime startTime = now.minusHours(4).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0);
-        String start = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        String end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        // Call the stored procedure for this interval
-        System.out.println("START TIME= "+start);
-        System.out.println("END TIME= "+end);
-        callInsertCryptosProcedure(start
-            ,
-            end
-        );
+        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0).minusSeconds(1);
 
+        fetchCryptoData( startTime,  endTime);
+       /* 
+		        String start = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		        String end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		        // Call the stored procedure for this interval
+		        System.out.println("START TIME= "+start);
+		        System.out.println("END TIME= "+end);
+		        callInsertCryptosProcedure(start
+		            ,
+		            end
+		        );
+		*/
         System.out.println("Scheduled Task Executed: " + startTime + " to " + endTime);
     }
 }
