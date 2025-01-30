@@ -94,18 +94,15 @@ public class CryptoDataScheduledTasks {
             LocalDateTime intlStart = intlEnd.minusMinutes(1);
 
             // Fetch OHLC data from Binance
-            Map<String, Object> euroData = fetchKlineData(binanceSymbol, "4h", euroStart, euroEnd);
-            Map<String, Object> intlData = fetchKlineData(binanceSymbol, "4h", startTime, endTime);
+            Map<String, Object> intlData = fetchKlineData(binanceSymbol, "1h", startTime, endTime);
 
             Double marketCap = MarketCapData.getOrDefault(coingeckoSymbol, 0.0);
             BigDecimal marketCapValue = BigDecimal.valueOf(marketCap);
             
-            if (binanceSymbol.equalsIgnoreCase("BTCUSDT") && !euroData.isEmpty() && !intlData.isEmpty()) {
+            if (binanceSymbol.equalsIgnoreCase("BTCUSDT") && !intlData.isEmpty()) {
             	
             	TmpCryBitcoinHighLow entity = TmpCryBitcoinHighLow.builder()
                         // Save Euro-time OHLC data
-            			    .openeur(new BigDecimal(euroData.getOrDefault("open", "0").toString())) // Convert String to BigDecimal
-            			    .closeeur(new BigDecimal(euroData.getOrDefault("close", "0").toString()))
             			    .high(new BigDecimal(intlData.getOrDefault("high", "0").toString()))
             			    .low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
             			    .volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
@@ -288,42 +285,78 @@ System.out.println("marketCapData -- "+marketCapData);
             return Collections.emptyMap();
         }
     }
-    public void callInsertCryptosProcedure(String startTime, String endTime) {
+    public void callInsertCryptosProcedure(String startTime, String endTime ,String startTimeCet, String endTimeCet) {
         StoredProcedureQuery query = entityManager.createStoredProcedureQuery("insert_cryptos_4_hour_data");
 
         // Register input parameters
-        query.registerStoredProcedureParameter("p_start_time", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_end_time", String.class, ParameterMode.IN);
-
+        query.registerStoredProcedureParameter("utc_start_time", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("utc_end_time", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("cet_start_time", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("cet_end_time", String.class, ParameterMode.IN);
+        
         // Set input parameter values
-        query.setParameter("p_start_time", startTime);
-        query.setParameter("p_end_time", endTime);
-
+        query.setParameter("utc_start_time", startTime);
+        query.setParameter("utc_end_time", endTime);
+        query.setParameter("cet_start_time", startTimeCet);
+        query.setParameter("cet_end_time", endTimeCet);
+        
         // Execute the procedure
         query.execute();
     }
     
-    // Scheduled task to run every 4 hours
+    @Scheduled(cron = "0 0 */1 * * *") 
+    public void schedule1HourIntervals() {
+    	
+        // Calculate the current interval's start and end times
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime startTime = now.minusHours(1).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0).minusSeconds(1);
+        
+        System.out.println("now --" + now);
+        System.out.println("startTime --" + startTime);
+        System.out.println("endTime --" + endTime);
+        
+        fetchCryptoData( startTime,  endTime);
+    
+        System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
+    }
+    
     @Scheduled(cron = "0 0 */4 * * *") // Runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
     public void schedule4HourIntervals() {
     	
         // Calculate the current interval's start and end times
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime startTime = now.minusHours(4).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0).minusSeconds(1);
+        LocalDateTime nowUTC = LocalDateTime.now(ZoneOffset.UTC);
+        // Calculate the original UTC start and end times
+        LocalDateTime startTimeUTC = nowUTC.minusHours(4).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endTimeUTC = nowUTC.withMinute(0).withSecond(0).withNano(0).minusSeconds(1);
 
-        fetchCryptoData( startTime,  endTime);
-       /* 
-		        String start = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-		        String end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-		        // Call the stored procedure for this interval
-		        System.out.println("START TIME= "+start);
-		        System.out.println("END TIME= "+end);
-		        callInsertCryptosProcedure(start
-		            ,
-		            end
-		        );
-		*/
-        System.out.println("Scheduled Task Executed: " + startTime + " to " + endTime);
+        // Convert the start and end times to CET, letting Java handle daylight savings
+        ZonedDateTime startTimeCET = startTimeUTC.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.of("CET"));
+        ZonedDateTime endTimeCET = endTimeUTC.atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.of("CET"));
+
+        // Calculate the dynamic time difference between UTC and CET
+        int utcOffsetHoursStart = startTimeCET.getOffset().getTotalSeconds() / 3600;  // Get offset in hours
+        int utcOffsetHoursEnd = endTimeCET.getOffset().getTotalSeconds() / 3600;
+
+        // Adjust UTC times by the offset
+        LocalDateTime adjustedStartTimeUTC = startTimeUTC.minusHours(utcOffsetHoursStart);
+        LocalDateTime adjustedEndTimeUTC = endTimeUTC.minusHours(utcOffsetHoursEnd);
+        
+      
+        String start = startTimeUTC.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String end = endTimeUTC.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        
+        String startCet = adjustedStartTimeUTC.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String endCet = adjustedEndTimeUTC.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        
+        // Call the stored procedure for this interval
+        System.out.println("START TIME= "+start);
+        System.out.println("END TIME= "+end);
+        
+        System.out.println("START TIME CET = "+startCet);
+        System.out.println("END TIME CET= "+endCet); 
+        callInsertCryptosProcedure(start ,   end, startCet, endCet);
+	
+        System.out.println("schedule4HourIntervals Task Executed: " + startTimeUTC + " to " + endTimeUTC);
     }
 }
