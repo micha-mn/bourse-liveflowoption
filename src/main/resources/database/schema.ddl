@@ -155,6 +155,21 @@ CREATE TABLE cr_xrp_four_hours  (
 );		  
 	create table cr_xrp_four_hours_seq (next_val bigint);
           insert into cr_xrp_four_hours_seq values ( 1 );	
+          
+          
+-- new         
+ create table cr_btc_high_low (
+ id bigint not null, 
+ close decimal(19,2),
+ high decimal(19,2), 
+ low decimal(19,2), 
+ marketcap decimal(19,2), 
+ open decimal(19,2), 
+ refer_date datetime, 
+ volume decimal(19,2), 
+ primary key (id));
+ create table cr_btc_high_low_seq (next_val bigint) ;
+ insert into cr_btc_high_low_seq values ( 1 );	
 			  		  
 		  
 		  

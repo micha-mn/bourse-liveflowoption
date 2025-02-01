@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.data.synchronisation.springboot.data.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.data.dto.TradeInfoDTO;
+import com.data.synchronisation.springboot.data.service.CryptoAnalyseHighLowService;
 import com.data.synchronisation.springboot.data.service.CryptoAnalyseService;
 import com.data.synchronisation.springboot.domain.entity.EnaTrackingTable;
 import com.data.synchronisation.springboot.domain.entity.EthFITrackingTable;
@@ -49,21 +52,24 @@ public class ScheduledTasks {
 	private EnaTrackingRepository enaTrackingRepository;
 	private EthFITrackingRepository ethFITrackingRepository;
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-
+	private CryptoAnalyseHighLowService cryptoAnalyseHighLowService;
 	public ScheduledTasks(RestTemplate restTemplate,
 			CryptoAnalyseService cryptoAnalyseService,
 			EnaTrackingRepository enaTrackingRepository,
-			EthFITrackingRepository ethFITrackingRepository) {
+			EthFITrackingRepository ethFITrackingRepository,
+			CryptoAnalyseHighLowService cryptoAnalyseHighLowService) {
+		
         this.serviceName = this.getClass().getName();
         this.restTemplate = restTemplate;
         this.cryptoAnalyseService = cryptoAnalyseService;
         this.enaTrackingRepository = enaTrackingRepository;
         this.ethFITrackingRepository = ethFITrackingRepository;
+        this.cryptoAnalyseHighLowService = cryptoAnalyseHighLowService ;
     }
 	
 	
 	
-	@Scheduled(fixedRate = 300000 ) // 20000   300000
+	@Scheduled(fixedRate = 20000 ) // 20000   300000
 	public void syncLiveCurrencyPriceANdCalculateMinMax() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -78,15 +84,15 @@ public class ScheduledTasks {
 	    	String url = "https://www.binance.com/api/v3/ticker/price?symbols=";
 	    	List<String> listOfCurrencies=new ArrayList<String>();
 	    	listOfCurrencies.add("BTCUSDT");
-	    	listOfCurrencies.add("DOGEUSDT");
-	    	listOfCurrencies.add("ETHFIUSDT");
-	    	listOfCurrencies.add("ENAUSDT");
-	    	listOfCurrencies.add("WUSDT");
-	    	listOfCurrencies.add("SAGAUSDT");
-	    	listOfCurrencies.add("BNBUSDT");
-	    	listOfCurrencies.add("ETHUSDT");
-	    	listOfCurrencies.add("PEPEUSDT");
-	    	listOfCurrencies.add("FLOKIUSDT");
+	    	//listOfCurrencies.add("DOGEUSDT");
+	    	//listOfCurrencies.add("ETHFIUSDT");
+	    	//listOfCurrencies.add("ENAUSDT");
+	    	//listOfCurrencies.add("WUSDT");
+	    	//listOfCurrencies.add("SAGAUSDT");
+	    	//listOfCurrencies.add("BNBUSDT");
+	    	//listOfCurrencies.add("ETHUSDT");
+	    	//listOfCurrencies.add("PEPEUSDT");
+	    	//listOfCurrencies.add("FLOKIUSDT");
 	    	
 			String levelPattern = new Gson().toJson(listOfCurrencies, ArrayList.class);
 			url = url +levelPattern;
@@ -113,7 +119,7 @@ public class ScheduledTasks {
 	}
 
     
-	@Scheduled(fixedRate = 200000)  // 20000   300000
+	// @Scheduled(fixedRate = 200000)  // 20000   300000
 	public void syncHistoricalTradeEnaInfo() {
 		log.info("syncTradeInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -321,6 +327,86 @@ public class ScheduledTasks {
 		
 	}
 	*/
+	
+	
+	
+	/*	 1625893200000,   // Open time
+        "34479.90",       // Open price
+        "34480.00",       // High price
+        "34479.80",       // Low price
+        "34480.00",       // Close price
+        "0.003",          // Volume
+        1625893259999,    // Close time
+        "103.44",         // Quote asset volume
+        1,                // Number of trades
+        "0",              // Taker buy base asset volume
+        "0",              // Taker buy quote asset volume
+        "0"               // Ignore
+        
+        >>  Market Capitalization (market_cap):
+		Definition: The market cap is the total value of all coins currently in circulation.
+		
+		Formula:Market Cap = Current Price × Circulating Supply
+		Market Cap=Current Price×Circulating Supply
+		The market cap only includes coins or tokens that are currently available in the market.
+        
+        
+        
+         >> Fully Diluted Valuation (fully_diluted_valuation):
+		Definition: The fully diluted valuation assumes that all possible coins or tokens (whether currently in 
+		        circulation or not) have been issued and are factored into the valuation.
+		
+		Formula: Fully Diluted Valuation = Current Price × Max Supply
+		Fully Diluted Valuation=Current Price×Max Supply
+		Key Point:
+		The fully diluted valuation represents the potential future value if all coins were issued, which is typically higher than the market cap.
+        -- --------------------------------
+        -- --------------------------------
+        accumulation distribution model
+		manipulation area
+		declining volume
+		price action
+		trend line
+		
+        */
+	    @Scheduled(cron = "0 0/5 * * * ?")
+		public void schedule1HourIntervals() {
+
+			// Calculate the current interval's start and end times
+			LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+			LocalDateTime startTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
+			LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC);//.minusSeconds(1);
+
+			System.out.println("now --" + now);
+			System.out.println("startTime --" + startTime);
+			System.out.println("endTime --" + endTime);
+
+			cryptoAnalyseHighLowService.fetchCryptoData(startTime, endTime);
+
+			System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
+		}
+	    
+	    /**
+	     *   
+	        working on 3 models out of 7 - calculated function
+	        remove market noise
+	     	accumilation distribution model
+			manipulation area
+			declining volume
+			price action
+			trend line
+			volatility analysis (moving in strong way)
+			liquidity
+			movement
+			moving average
+			trendline
+			retracement
+			resistant point
+			support point
+			first resistent level
+			second resistent point
+			bollinger
+	     * */
 	
 	
 }
