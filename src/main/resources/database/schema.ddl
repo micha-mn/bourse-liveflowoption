@@ -157,19 +157,16 @@ CREATE TABLE cr_xrp_four_hours  (
           insert into cr_xrp_four_hours_seq values ( 1 );	
           
           
--- new         
- create table cr_btc_high_low (
- id bigint not null, 
- close decimal(19,2),
- high decimal(19,2), 
- low decimal(19,2), 
- marketcap decimal(19,2), 
- open decimal(19,2), 
- refer_date datetime, 
- volume decimal(19,2), 
- primary key (id));
- create table cr_btc_high_low_seq (next_val bigint) ;
- insert into cr_btc_high_low_seq values ( 1 );	
+-- new        
+ 
+ALTER TABLE `bourse`.`cr_btc_high_low` 
+CHANGE COLUMN `close` `close` DECIMAL(30,8) NULL DEFAULT NULL ,
+CHANGE COLUMN `high` `high` DECIMAL(30,8) NULL DEFAULT NULL ,
+CHANGE COLUMN `low` `low` DECIMAL(30,8) NULL DEFAULT NULL ,
+CHANGE COLUMN `marketcap` `marketcap` DECIMAL(30,8) NULL DEFAULT NULL ,
+CHANGE COLUMN `open` `open` DECIMAL(30,8) NULL DEFAULT NULL ,
+CHANGE COLUMN `volume` `volume` DECIMAL(30,8) NULL DEFAULT NULL ;
+
 			  		  
 		  
 		  

@@ -91,8 +91,13 @@ public class CryptoAnalyseHighLowService {
 
 			if (binanceSymbol.equalsIgnoreCase("BTCUSDT") && !intlData.isEmpty()) {
 
+				System.out.println("high "+intlData.getOrDefault("high", "0"));
+				System.out.println("low "+intlData.getOrDefault("low", "0"));
+				System.out.println("volume "+intlData.getOrDefault("volume", "0"));
+				System.out.println("open "+intlData.getOrDefault("open", "0"));
+				System.out.println("close "+intlData.getOrDefault("close", "0"));
+				
 				CrBTCHighLow entity = CrBTCHighLow.builder()
-
 						.high(new BigDecimal(intlData.getOrDefault("high", "0").toString()))
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))

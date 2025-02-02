@@ -373,9 +373,15 @@ public class ScheduledTasks {
 		public void schedule1HourIntervals() {
 
 			// Calculate the current interval's start and end times
+	    	
 			LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-			LocalDateTime startTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
-			LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC);//.minusSeconds(1);
+			
+			// End time: rounded down to the nearest 5-minute interval
+	        LocalDateTime endTime = now.withMinute((now.getMinute() / 5) * 5).withSecond(0).withNano(0);
+	        LocalDateTime startTime = endTime.minusMinutes(5);
+	        
+			//LocalDateTime startTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5);
+			//LocalDateTime endTime = LocalDateTime.now(ZoneOffset.UTC);//.minusSeconds(1);
 
 			System.out.println("now --" + now);
 			System.out.println("startTime --" + startTime);

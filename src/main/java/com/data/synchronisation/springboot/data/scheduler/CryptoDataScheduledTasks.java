@@ -155,9 +155,20 @@ public class CryptoDataScheduledTasks {
 				System.out.println("Saved combined data for: " + binanceSymbol);
 			} else if (binanceSymbol.equalsIgnoreCase("SHIBUSDT") && !intlData.isEmpty()) {
 
-				CrShibaHighLow entity = CrShibaHighLow.builder()
-						// Save Euro-time OHLC data
-						.high(new BigDecimal(intlData.getOrDefault("high", "0").toString()))
+			   // BigDecimal scaleFactor = new BigDecimal("1000");
+
+			    CrShibaHighLow entity = CrShibaHighLow.builder()
+			            // Save Euro-time OHLC data, scaling each value appropriately
+			          /*  .high(new BigDecimal(intlData.getOrDefault("high", "0").toString()).multiply(scaleFactor))
+			            .low(new BigDecimal(intlData.getOrDefault("low", "0").toString()).multiply(scaleFactor))
+			            .volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString())) // Volume stays as is
+			            .marketcap(marketCapValue) // Assuming marketCapValue is already properly formatted
+			            .openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()).multiply(scaleFactor))
+			            .closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString()).multiply(scaleFactor))
+			            .startTime(startTime)
+			            .endTime(endTime)
+			          */
+			    		.high(new BigDecimal(intlData.getOrDefault("high", "0").toString()))
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
@@ -165,9 +176,10 @@ public class CryptoDataScheduledTasks {
 						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime).build();
 
-				// Save entity to the database
-				crShibaHighLowRepository.save(entity);
-				System.out.println("Saved combined data for: " + binanceSymbol);
+			    // Save entity to the database
+			    crShibaHighLowRepository.save(entity);
+			    System.out.println("Saved combined data for: " + binanceSymbol);
+			    
 			} else if (binanceSymbol.equalsIgnoreCase("XRPUSDT") && !intlData.isEmpty()) {
 
 				CrXrpHighLow entity = CrXrpHighLow.builder()
@@ -287,7 +299,7 @@ public class CryptoDataScheduledTasks {
 		System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
 	}
 
-//	@Scheduled(cron = "0 0 */4 * * *") // Runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
+	//@Scheduled(cron = "0 0 */4 * * *") // Runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
 	public void schedule4HourIntervals() {
 
 		// Calculate the current interval's start and end times
@@ -321,6 +333,7 @@ public class CryptoDataScheduledTasks {
 		System.out.println("START TIME CET = " + startCet);
 		System.out.println("END TIME CET= " + endCet);
 		callInsertCryptosProcedure(start, end, startCet, endCet);
+		System.out.println("-- time  " + start + " to " + end + " CET " + start + " to " + end);
 
 		System.out.println("schedule4HourIntervals Task Executed: " + startTimeUTC + " to " + endTimeUTC);
 	}
