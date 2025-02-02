@@ -1,274 +1,70 @@
-USE `bourse`;
-DROP procedure IF EXISTS `calculation_audit_cryptos_4_hour_data`;
+
 
 USE `bourse`;
-DROP procedure IF EXISTS `bourse`.`calculation_audit_cryptos_4_hour_data`;
+DROP procedure IF EXISTS `dynamic_calculation_candlestick_graph_four_hour_interval`;
+
+USE `bourse`;
+DROP procedure IF EXISTS `bourse`.`dynamic_calculation_candlestick_graph_four_hour_interval`;
 ;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `calculation_audit_cryptos_4_hour_data`(IN referDate VARCHAR(255),IN groupId VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dynamic_calculation_candlestick_graph_four_hour_interval`(
+																		 IN fromDate VARCHAR(255),
+																		 IN toDateDate VARCHAR(255),
+																		 IN tableName VARCHAR(255),
+                                                                         IN column1 VARCHAR(255),
+                                                                         IN column2 VARCHAR(255),
+                                                                         IN column3 VARCHAR(255),
+                                                                         IN column4 VARCHAR(255))
 BEGIN
-    IF groupId = 71 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_bitcoin_four_hours');
-    ELSEIF groupId = 72 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_ethereum_four_hours');
-    ELSEIF groupId = 73 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_solana_four_hours');
-    ELSEIF groupId = 74 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_shiba_four_hours');
-    ELSEIF groupId = 75 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_binance_four_hours');  
-    ELSEIF groupId = 76 THEN
-        call calculating_audit_cryptos_4_hour_data(referDate,groupId,'cr_xrp_four_hours');  
-         END IF;
-
+DECLARE sqlTxt varchar(255);
+	SET GLOBAL sql_mode = '';
+	SET SESSION sql_mode = '';  
+    
+	 SET @sql_text:= CONCAT('  SELECT (@row_number:=@row_number + 1) AS id, 
+	    DATE_FORMAT(start_time, ''%d-%b-%y %h:%i'') AS x, 
+	   JSON_ARRAY(open, high, low, close) AS y  from (
+			SELECT 
+			  DATE(start_time) AS trade_date,
+			  -- This expression computes the period start hour (0, 4, 8, …)
+			  CONCAT(LPAD(FLOOR(HOUR(start_time)/4)*4, 2, ''0''), '':00:00'') AS period,
+			  MIN(start_time) AS start_time,
+			  MAX(end_time) AS end_time,
+			  
+			  -- Get the open value from the first record of the group
+			  (SELECT open 
+			   FROM `',tableName,'` t2 
+			   WHERE t2.start_time = MIN(t1.start_time)
+			   LIMIT 1) AS open,
+			  
+			  -- Get the close value from the last record of the group
+			  (SELECT close 
+			   FROM  `',tableName,'`  t3 
+			   WHERE t3.end_time = MAX(t1.end_time)
+			   LIMIT 1) AS close,
+			  
+			  MAX(high) AS high,
+			  MIN(low) AS low,
+			  SUM(volume) AS volume,
+			  (SELECT marketcap
+			FROM  `',tableName,'`  t
+			WHERE t.end_time <= MAX(t1.end_time)
+			  AND marketcap <> 0
+			ORDER BY t.end_time DESC
+			LIMIT 1) AS marketcap
+			FROM  `',tableName,'`  t1
+			GROUP BY trade_date, period
+			ORDER BY trade_date, period)t  
+					WHERE start_time BETWEEN ''',fromDate,''' and ''',toDateDate,'''
+					ORDER BY  start_time  ASC; ');
+          
+    PREPARE stmt from @sql_text;
+	EXECUTE stmt;  
+	
 END$$
 
 DELIMITER ;
 
--- -----------------------------------------
-USE `bourse`;
-DROP procedure IF EXISTS `insert_cryptos_4_hour_data`;
-
-USE `bourse`;
-DROP procedure IF EXISTS `bourse`.`insert_cryptos_4_hour_data`;
-;
-DELIMITER $$
-CREATE PROCEDURE insert_cryptos_4_hour_data(
-    IN utc_start_time DATETIME,
-    IN utc_end_time DATETIME,
-    IN cet_start_time DATETIME,
-    IN cet_end_time DATETIME
-)
-BEGIN
-   
-    -- Bitcoin
-    INSERT INTO cr_bitcoin_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-		SELECT
-			(SELECT openint
-			 FROM cr_bitcoin_high_low
-			 WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time
-			 ORDER BY start_time ASC
-			 LIMIT 1) AS `openint`,
-			(SELECT openint
-			 FROM cr_bitcoin_high_low
-			 WHERE start_time >= cet_start_time
-			   AND end_time <= cet_end_time
-			 ORDER BY start_time ASC
-			 LIMIT 1) AS `openeur`,
-			(SELECT closeint
-			 FROM cr_bitcoin_high_low
-			 WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time
-			 ORDER BY start_time DESC
-			 LIMIT 1) AS `closeint`,
-			(SELECT closeint
-			 FROM cr_bitcoin_high_low
-			  WHERE start_time >= cet_start_time
-			   AND end_time <= cet_end_time
-			 ORDER BY start_time DESC
-			 LIMIT 1) AS `closeeur`,
-			MAX(high) AS high,
-			MIN(low) AS low,
-			SUM(volume) AS volume,
-			AVG(REPLACE(marketcap, ',', '') + 0) AS avg_marketcap,  
-			utc_start_time AS start_time,
-			utc_end_time AS end_time
-		FROM cr_bitcoin_high_low
-			WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time;
-
-    -- Ethereum
-   INSERT INTO cr_ethereum_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-		SELECT
-			(SELECT openint
-			 FROM cr_ethereum_high_low
-			 WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time
-			 ORDER BY start_time ASC
-			 LIMIT 1) AS `openint`,
-			(SELECT openint
-			 FROM cr_ethereum_high_low
-			 WHERE start_time >= cet_start_time
-			   AND end_time <= cet_end_time
-			 ORDER BY start_time ASC
-			 LIMIT 1) AS `openeur`,
-			(SELECT closeint
-			 FROM cr_ethereum_high_low
-			 WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time
-			 ORDER BY start_time DESC
-			 LIMIT 1) AS `closeint`,
-			(SELECT closeint
-			 FROM cr_ethereum_high_low
-			  WHERE start_time >= cet_start_time
-			   AND end_time <= cet_end_time
-			 ORDER BY start_time DESC
-			 LIMIT 1) AS `closeeur`,
-			MAX(high) AS high,
-			MIN(low) AS low,
-			SUM(volume) AS volume,
-			AVG(REPLACE(marketcap, ',', '') + 0) AS avg_marketcap,  
-			utc_start_time AS start_time,
-			utc_end_time AS end_time
-		FROM cr_ethereum_high_low
-			WHERE start_time >= utc_start_time
-			   AND end_time <= utc_end_time;
-  
-    -- Solana
-   INSERT INTO cr_solana_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-		SELECT
-			(SELECT openint
-			 FROM cr_solana_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date ASC
-			 LIMIT 1) AS `openint`,
-             (SELECT openeur
-			 FROM cr_solana_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date ASC
-			 LIMIT 1) AS `openeur`,
-			(SELECT closeint
-			 FROM cr_solana_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date DESC
-			 LIMIT 1) AS `closeint`,
-             (SELECT closeeur
-			 FROM cr_solana_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date DESC
-			 LIMIT 1) AS `closeeur`,
-			MAX(high) AS high,
-			MIN(low) AS low,
-			SUM(volume) AS volume,
-			MAX(REPLACE(marketcap, ',', '')) AS marketcap, -- Remove commas
-			utc_start_time AS start_time,
-			utc_end_time AS end_time
-		FROM cr_solana_high_low
-		WHERE refer_date >= utc_start_time
-		  AND refer_date < utc_end_time;
-
-    -- Shiba
-    INSERT INTO cr_shiba_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-			SELECT
-				(SELECT openint
-				 FROM cr_shiba_high_low
-				 WHERE refer_date >= utc_start_time
-				   AND refer_date < utc_end_time
-				 ORDER BY refer_date ASC
-				 LIMIT 1) AS `openint`,
-                 (SELECT openeur
-				 FROM cr_shiba_high_low
-				 WHERE refer_date >= utc_start_time
-				   AND refer_date < utc_end_time
-				 ORDER BY refer_date ASC
-				 LIMIT 1) AS `openeur`,
-				(SELECT closeint
-				 FROM cr_shiba_high_low
-				 WHERE refer_date >= utc_start_time
-				   AND refer_date < utc_end_time
-				 ORDER BY refer_date DESC
-				 LIMIT 1) AS `closeint`,
-                 (SELECT closeeur
-				 FROM cr_shiba_high_low
-				 WHERE refer_date >= utc_start_time
-				   AND refer_date < utc_end_time
-				 ORDER BY refer_date DESC
-				 LIMIT 1) AS `closeeur`,
-				MAX(high) AS high,
-				MIN(low) AS low,
-				SUM(volume) AS volume,
-				MAX(REPLACE(marketcap, ',', '')) AS marketcap, -- Remove commas
-				utc_start_time AS start_time,
-				utc_end_time AS end_time
-			FROM cr_shiba_high_low
-			WHERE refer_date >= utc_start_time
-			  AND refer_date < utc_end_time;
-
-    -- Binance Coin
-    INSERT INTO cr_binance_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-		SELECT
-			(SELECT openint
-			 FROM cr_binance_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date ASC
-			 LIMIT 1) AS `openint`,
-             (SELECT openeur
-			 FROM cr_binance_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date ASC
-			 LIMIT 1) AS `openeur`,
-			(SELECT closeint
-			 FROM cr_binance_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date DESC
-			 LIMIT 1) AS `closeint`,
-             (SELECT closeeur
-			 FROM cr_binance_high_low
-			 WHERE refer_date >= utc_start_time
-			   AND refer_date < utc_end_time
-			 ORDER BY refer_date DESC
-			 LIMIT 1) AS `closeeur`,
-			MAX(high) AS high,
-			MIN(low) AS low,
-			SUM(volume) AS volume,
-			MAX(REPLACE(marketcap, ',', '')) AS marketcap, -- Remove commas
-			utc_start_time AS start_time,
-			utc_end_time AS end_time
-		FROM cr_binance_high_low
-		WHERE refer_date >= utc_start_time
-		  AND refer_date < utc_end_time;
-
-    -- XRP
-	INSERT INTO cr_xrp_four_hours (openint,openeur, closeint ,closeeur, high, low, volume, marketcap, start_time, end_time)
-	SELECT
-		(SELECT openint
-		 FROM cr_xrp_high_low
-		 WHERE refer_date >= utc_start_time
-		   AND refer_date < utc_end_time
-		 ORDER BY refer_date ASC
-		 LIMIT 1) AS `openint`,
-         (SELECT openeur
-		 FROM cr_xrp_high_low
-		 WHERE refer_date >= utc_start_time
-		   AND refer_date < utc_end_time
-		 ORDER BY refer_date ASC
-		 LIMIT 1) AS `openeur`,
-		(SELECT closeint
-		 FROM cr_xrp_high_low
-		 WHERE refer_date >= utc_start_time
-		   AND refer_date < utc_end_time
-		 ORDER BY refer_date DESC
-		 LIMIT 1) AS `closeint`,
-         (SELECT closeeur
-		 FROM cr_xrp_high_low
-		 WHERE refer_date >= utc_start_time
-		   AND refer_date < utc_end_time
-		 ORDER BY refer_date DESC
-		 LIMIT 1) AS `closeeur`,
-		MAX(high) AS high,
-		MIN(low) AS low,
-		SUM(volume) AS volume,
-		MAX(REPLACE(marketcap, ',', '')) AS marketcap, -- Remove commas
-		utc_start_time AS start_time,
-		utc_end_time AS end_time
-	FROM cr_xrp_high_low
-	WHERE refer_date >= utc_start_time
-	  AND refer_date < utc_end_time;
-
-END$$
-
-DELIMITER ;
-
--- --------------
 
 
 
-
+-- ---------------------------------------------------
