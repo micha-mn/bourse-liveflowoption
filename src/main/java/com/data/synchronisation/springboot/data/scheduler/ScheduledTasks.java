@@ -413,6 +413,35 @@ public class ScheduledTasks {
 			second resistent point
 			bollinger
 	     * */
+	    
+	    /*
+	     * bollinger
+	     * 
+	     * 
+	     * 
+	     * three lines plotted on a price chart:
+
+			Middle Band: A simple moving average (SMA), typically set to 20 periods.
+			
+			Upper Band: Calculated by adding a multiple (usually 2) of the standard deviation to the middle band.
+			
+			Lower Band: Calculated by subtracting the same multiple of the standard deviation from the middle band.
+	     */
+	    
+	    /*
+	     * 
+	     * Combine Bollinger Bands with other candlestick signals like engulfing patterns, doji, or hammer candlesticks to strengthen trade accuracy.
+	     * 
+	     * 
+	     * 
+	     * 
+	     * 1. Pivot Point Formula
+				Support Levels
+	     *             Support 1 (S1):
+	     *             Support 2 (S2):
+	     * 
+	     * 
+	     * */
 	
 	
 }
