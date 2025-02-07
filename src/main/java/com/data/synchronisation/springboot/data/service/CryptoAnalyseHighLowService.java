@@ -78,7 +78,7 @@ public class CryptoAnalyseHighLowService {
 			System.out.println("Fetching 3 minutes cacndle data for symbol: " + binanceSymbol);
 
 			// Fetch OHLC data from Binance
-			Map<String, Object> intlData = fetchKlineData(binanceSymbol, "1s", startTime, endTime);
+			Map<String, Object> intlData = fetchKlineData(binanceSymbol, "1m", startTime, endTime);
 
 			Double marketCap = MarketCapData.getOrDefault(coingeckoSymbol, 0.0);
 			BigDecimal marketCapValue = BigDecimal.valueOf(marketCap);
