@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.data.synchronisation.springboot.data.scheduler.CryptoDataScheduledTasks;
 import com.data.synchronisation.springboot.domain.entity.CrBTCHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrBinanceHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrEthereumHighLow;
@@ -38,7 +37,7 @@ import com.data.synchronisation.springboot.repositories.CrXrpHighLowRepository;
 @Service
 public class CryptoAnalyseHighLowService {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-	private static final Logger log = LoggerFactory.getLogger(CryptoDataScheduledTasks.class);
+	private static final Logger log = LoggerFactory.getLogger(CryptoAnalyseHighLowService.class);
 
 	private final RestTemplate restTemplate = new RestTemplate();
 	private static final String BINANCE_KLINE_URL = "https://api.binance.com/api/v3/klines";
@@ -61,16 +60,11 @@ public class CryptoAnalyseHighLowService {
 	private EntityManager entityManager;
 
 	// Cryptocurrencies to fetch data for
-	private static final String[] BINANCE_SYMBOLS = { "BTCUSDT"};
-	//, "ETHUSDT", "SOLUSDT", "SHIBUSDT", "BNBUSDT",
-	//		"XRPUSDT" };
+	private static final String[] BINANCE_SYMBOLS = { "BTCUSDT", "ETHUSDT", "SOLUSDT", "SHIBUSDT", "BNBUSDT",
+			"XRPUSDT" };
 	
-	private static final String[] COINGECKO_SYMBOLS = { "bitcoin"};
-	//, "ethereum", "solana", "shiba-inu", "binancecoin",
-	//		"ripple" };
-	
-	
-	
+	private static final String[] COINGECKO_SYMBOLS = { "bitcoin", "ethereum", "solana", "shiba-inu", "binancecoin",
+			"ripple" };
 	
 	public void fetchCryptoData(LocalDateTime startTime, LocalDateTime endTime) {
 		System.out.println("Fetching data at: " + LocalDateTime.now());
@@ -84,7 +78,7 @@ public class CryptoAnalyseHighLowService {
 			System.out.println("Fetching 3 minutes cacndle data for symbol: " + binanceSymbol);
 
 			// Fetch OHLC data from Binance
-			Map<String, Object> intlData = fetchKlineData(binanceSymbol, "5m", startTime, endTime);
+			Map<String, Object> intlData = fetchKlineData(binanceSymbol, "1s", startTime, endTime);
 
 			Double marketCap = MarketCapData.getOrDefault(coingeckoSymbol, 0.0);
 			BigDecimal marketCapValue = BigDecimal.valueOf(marketCap);
@@ -119,9 +113,12 @@ public class CryptoAnalyseHighLowService {
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
-						.openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
-						.endTime(endTime).build();
+						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.endTime(endTime)
+						.referDate(LocalDateTime.now())
+						.build();
+				
 				// Save entity to the database
 				crBinanceHighLowRepository.save(entity);
 				System.out.println("Saved combined data for: " + binanceSymbol);
@@ -133,9 +130,11 @@ public class CryptoAnalyseHighLowService {
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
-						.openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
-						.endTime(endTime).build();
+						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.endTime(endTime)
+						.referDate(LocalDateTime.now())
+						.build();
 
 				// Save entity to the database
 				crEthereumHighLowRepository.save(entity);
@@ -148,9 +147,11 @@ public class CryptoAnalyseHighLowService {
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
-						.openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
-						.endTime(endTime).build();
+						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.endTime(endTime)
+						.referDate(LocalDateTime.now())
+						.build();
 
 				// Save entity to the database
 				crSolanaHighLowRepository.save(entity);
@@ -163,9 +164,11 @@ public class CryptoAnalyseHighLowService {
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
-						.openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
-						.endTime(endTime).build();
+						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.endTime(endTime)
+						.referDate(LocalDateTime.now())
+						.build();
 
 				// Save entity to the database
 				crShibaHighLowRepository.save(entity);
@@ -178,9 +181,11 @@ public class CryptoAnalyseHighLowService {
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
-						.openint(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.closeint(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
-						.endTime(endTime).build();
+						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.endTime(endTime)
+						.referDate(LocalDateTime.now())
+						.build();
 
 				// Save entity to the database
 				crXrpHighLowRepository.save(entity);
