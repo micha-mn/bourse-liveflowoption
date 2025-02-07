@@ -17,44 +17,35 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
-@NoArgsConstructor 
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "cr_shiba_high_low")
 public class CrShibaHighLow {
 	@Id
-	 @GeneratedValue(generator = "cr_shiba_high_low_seq")
-	 @GenericGenerator(
-	      name = "cr_shiba_high_low_seq",
-	      strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-	      parameters = {
-	        @Parameter(name = "sequence_name", value = "cr_shiba_high_low_seq"),
-	        @Parameter(name = "initial_value", value = "1"),
-	        @Parameter(name = "increment_size", value = "1")
-	        }
-	    )
+	@GeneratedValue(generator = "cr_shiba_high_low_seq")
+	@GenericGenerator(name = "cr_shiba_high_low_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = {
+			@Parameter(name = "sequence_name", value = "cr_shiba_high_low_seq"),
+			@Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
 	private Long id;
-	@Column(name = "openeur")
-   private BigDecimal  openeur;
-	@Column(name = "closeeur")
-   private BigDecimal  closeeur;
-   @Column(name = "high")
-   private BigDecimal  high;
+	@Column(name = "high")
+	private BigDecimal high;
 	@Column(name = "low")
-   private BigDecimal  low;
+	private BigDecimal low;
 	@Column(name = "volume")
-   private BigDecimal  volume;
+	private BigDecimal volume;
 	@Column(name = "marketcap")
-   private BigDecimal  marketcap;
-   @Column(name = "openint")
-   private BigDecimal  openint;
-	@Column(name = "closeint")
-   private BigDecimal  closeint;
+	private BigDecimal marketcap;
+	@Column(name = "open")
+	private BigDecimal open;
+	@Column(name = "close")
+	private BigDecimal close;
 	@Column(name = "start_time")
-   private LocalDateTime startTime;
+	private LocalDateTime startTime;
 	@Column(name = "end_time")
-   private LocalDateTime endTime;
+	private LocalDateTime endTime;
+	@Column(name = "refer_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private LocalDateTime referDate;
 }
