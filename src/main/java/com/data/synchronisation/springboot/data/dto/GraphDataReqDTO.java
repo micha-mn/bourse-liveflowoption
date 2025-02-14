@@ -15,4 +15,5 @@ public class GraphDataReqDTO {
     private String toDate;
     private String dataType;  // normal max min
     private String cryptoCurrencyCode;
+    private String period;
 }

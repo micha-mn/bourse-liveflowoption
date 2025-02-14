@@ -48,6 +48,10 @@ public class CryptoAnalyseController {
 	public ModelAndView dataGraph(ModelMap model) {
 		return new ModelAndView("html/graph");
 	}
+	@RequestMapping(value = "/dashboard")
+	public ModelAndView dashboardView(ModelMap model) {
+		return new ModelAndView("html/dashboard/index");
+	}
 
 	@GetMapping("/tablename")
 	public ResponseEntity<List<Map<String, String>>> getTableNameEnum() {
@@ -82,7 +86,10 @@ public class CryptoAnalyseController {
 	public GraphFulllResponseDTO getGraphData(@RequestBody GraphDataReqDTO req) {
 		return cryptoAnalyseService.getGraphData(req);
 	}
-	
+	@PostMapping(value = "getCandleGraphData")
+	public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
+		return cryptoAnalyseService.getCandleGraphData(req);
+	}
 	@PostMapping(value = "getSupportResistantForGraph")
 	public ResponseEntity<SupportResistantPointsDTO> getSupportResistantForGraph(@RequestBody GraphDataReqDTO req) {
 		

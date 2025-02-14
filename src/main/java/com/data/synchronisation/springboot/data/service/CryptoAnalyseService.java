@@ -659,6 +659,40 @@ public class CryptoAnalyseService {
 	
 	   return resp; 
 	}
+
+	public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
+		
+		LocalDateTime fromDate = LocalDateTime.parse(req.getFromDate(), formatter);
+		LocalDateTime toDate = LocalDateTime.parse(req.getToDate(), formatter);
+		String tableName=null;	
+		if(req.getCryptoCurrencyCode().equalsIgnoreCase("BTC"))
+			tableName="cr_btc_high_low";
+		
+		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_dynamic_calculation_candlestick_graph",GraphResponseDTO.class);
+		
+   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("fromDate",fromDate );
+   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("toDate",toDate );
+   		query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
+   		query.setParameter("tableName", tableName);
+   		query.registerStoredProcedureParameter("period", Integer.class, ParameterMode.IN);
+   		query.setParameter("period",0 );
+   		
+   		List<GraphResponseDTO> graphNormalResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		GraphGeneralResponseDTO respNormal = GraphGeneralResponseDTO.builder()
+				.data(graphNormalResponseDTOlst)
+				.name("NORMAL")
+				.build();
+		
+		GraphFulllResponseDTO resp = GraphFulllResponseDTO.builder()
+				.dataNormal(respNormal)
+				.build();
+	
+	   return resp; 
+	}
 	
 	public SupportResistantPointsDTO getSupportResistantForGraph(@RequestBody GraphDataReqDTO req) {
 		
