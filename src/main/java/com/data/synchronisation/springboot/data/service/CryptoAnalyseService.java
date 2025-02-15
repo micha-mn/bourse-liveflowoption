@@ -676,8 +676,8 @@ public class CryptoAnalyseService {
    		query.setParameter("toDate",toDate );
    		query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
    		query.setParameter("tableName", tableName);
-   		query.registerStoredProcedureParameter("period", Integer.class, ParameterMode.IN);
-   		query.setParameter("period",0 );
+   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+   		query.setParameter("period",req.getPeriod() );
    		
    		List<GraphResponseDTO> graphNormalResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
    		entityManager.clear();

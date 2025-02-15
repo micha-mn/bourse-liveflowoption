@@ -732,7 +732,9 @@ input::placeholder {
 .error {
   color: #fe1010;
 }
-
+.fill-white {
+     fill: white;
+}
 .dash-lable {
   font-size: 14px;
   padding: 2px 7px;
@@ -740,7 +742,15 @@ input::placeholder {
   width: -moz-max-content;
   width: max-content;
 }
-
+.btn.btn-no-line.active {
+    color: #ffc112;
+    border: 0px;
+}
+.spinner-style {
+    z-index: 1;
+    position: absolute;
+    margin: 10% 44%;
+}
 form select.error,
 form textarea.error,
 form input.error,

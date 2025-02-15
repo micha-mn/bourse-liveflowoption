@@ -4,11 +4,6 @@ $(function () {
   "use strict";
 
 
-  /* scrollar */
-
-  new PerfectScrollbar(".notify-list")
-  new PerfectScrollbar(".scroll-menu");
-  new PerfectScrollbar(".search-content")
 
 
   // Active menu
