@@ -156,50 +156,39 @@ BEGIN
     -- Convert period to seconds for grouping
     CASE period
         WHEN '1m'  THEN SET interval_seconds = 60;
+        WHEN '5m' THEN SET interval_seconds = 300;
         WHEN '15m' THEN SET interval_seconds = 900;
         WHEN '1h'  THEN SET interval_seconds = 3600;
         WHEN '4h'  THEN SET interval_seconds = 14400;
         WHEN '1d'  THEN SET interval_seconds = 86400;
         ELSE SET interval_seconds = 3600; -- Default to 1 hour if invalid period
     END CASE;
-    if(period='1m') then 
-       SET @sql_text = CONCAT(
-        'SELECT (@row_number:=@row_number + 1) AS id, 
-            DATE_FORMAT(start_time, ''%d-%b-%y %H:%i'') AS x, 
-            JSON_ARRAY(open, high, low, close) AS y  
-        FROM  `', tableName, '` t1, 
-        (SELECT @row_number:=0) AS t 
-        WHERE start_time BETWEEN ''', fromDate, ''' AND ''', toDateDate, '''
-        ORDER BY start_time ASC;'
-    );
-    else
+    
     SET @sql_text = CONCAT(
-        'SELECT (@row_number:=@row_number + 1) AS id, 
-            DATE_FORMAT(start_time, ''%d-%b-%y %H:%i'') AS x, 
-            JSON_ARRAY(open, high, low, close) AS y  
-        FROM (
-            SELECT 
-                DATE(start_time) AS trade_date,
-                FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(start_time) / ', interval_seconds, ') * ', interval_seconds, ') AS period_start,
-                MIN(start_time) AS start_time,
-                MAX(end_time) AS end_time,
-                -- Open Price from first row in interval
-                (SELECT open FROM `', tableName, '` t2 
-                 WHERE t2.start_time = MIN(t1.start_time) LIMIT 1) AS open,
-                -- Close Price from last row in interval
-                (SELECT close FROM `', tableName, '` t3 
-                 WHERE t3.end_time = MAX(t1.end_time) LIMIT 1) AS close,
-                MAX(high) AS high,
-                MIN(low) AS low
-            FROM `', tableName, '` t1
-            GROUP BY trade_date, period_start
-            ORDER BY trade_date, period_start
-        ) t1,
-        (SELECT @row_number:=0) AS t 
-        WHERE start_time BETWEEN ''', fromDate, ''' AND ''', toDateDate, '''
-        ORDER BY start_time ASC;'
+  'WITH grouped_data AS (
+    SELECT 
+        FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP(start_time) /  ', interval_seconds, ') *  ', interval_seconds, ') AS time_interval,
+        MIN(low) AS min_low,
+        MAX(high) AS max_high,
+        MIN(start_time) AS first_start_time, -- Used for Open price
+        MAX(start_time) AS last_start_time   -- Used for Close price
+    FROM `', tableName, '`
+    WHERE start_time BETWEEN ''', fromDate, ''' AND ''', toDateDate, '''
+    GROUP BY time_interval
+)
+SELECT 
+   (@row_number:=@row_number + 1) AS id, 
+   DATE_FORMAT(time_interval, ''%d-%b-%y %H:%i'') AS x, 
+   JSON_ARRAY(open, max_high, min_low, close) AS y from( 
+   select o.open, g.max_high, g.min_low, c.close,g.time_interval
+FROM grouped_data g
+LEFT JOIN `', tableName, '` o ON g.first_start_time = o.start_time  -- Fetch Open price
+LEFT JOIN `', tableName, '` c ON g.last_start_time = c.start_time   -- Fetch Close price
+CROSS JOIN (SELECT @row_number:=0) AS t  -- Row numbering
+ORDER BY g.time_interval ASC)tab;'
     );
-	end if;
+    
+    
     -- Prepare and Execute Statement
     PREPARE stmt FROM @sql_text;
     EXECUTE stmt;
@@ -207,9 +196,3 @@ BEGIN
 END$$
 
 DELIMITER ;
-
-
-
-
-
-
