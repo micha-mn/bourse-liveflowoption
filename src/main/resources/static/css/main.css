@@ -751,6 +751,9 @@ input::placeholder {
     position: absolute;
     margin: 10% 44%;
 }
+button.btn.btn-no-line.raised.d-flex.gap-2:active {
+    border: 0px;
+}
 form select.error,
 form textarea.error,
 form input.error,
