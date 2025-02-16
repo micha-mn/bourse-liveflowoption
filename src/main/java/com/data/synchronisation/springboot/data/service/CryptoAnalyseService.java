@@ -687,8 +687,29 @@ public class CryptoAnalyseService {
 				.name("NORMAL")
 				.build();
 		
+
+		query = this.entityManager.createStoredProcedureQuery("cr_dynamic_calculation_volume_graph",GraphResponseDTO.class);
+		
+   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("fromDate",fromDate );
+   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
+   		query.setParameter("toDate",toDate );
+   		query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
+   		query.setParameter("tableName", tableName);
+   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+   		query.setParameter("period",req.getPeriod() );
+   		
+   		List<GraphResponseDTO> graphVolumeResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
+   		entityManager.clear();
+		entityManager.close();
+		GraphGeneralResponseDTO respVolume= GraphGeneralResponseDTO.builder()
+				.data(graphVolumeResponseDTOlst)
+				.name("VOLUME")
+				.build();
+		
 		GraphFulllResponseDTO resp = GraphFulllResponseDTO.builder()
-				.dataNormal(respNormal)
+				.dataCandle(respNormal)
+				.dataVolume(respVolume)
 				.build();
 	
 	   return resp; 

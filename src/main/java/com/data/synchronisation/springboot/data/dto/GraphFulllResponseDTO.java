@@ -1,9 +1,5 @@
 package com.data.synchronisation.springboot.data.dto;
 
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GraphFulllResponseDTO {
 	private GraphGeneralResponseDTO dataNormal;
+	private GraphGeneralResponseDTO dataVolume;
+	private GraphGeneralResponseDTO dataCandle;
 	private GraphGeneralResponseDTO dataMax;
 	private GraphGeneralResponseDTO dataMin;
 }

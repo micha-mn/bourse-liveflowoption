@@ -133,7 +133,7 @@ DELIMITER ;
 
 
 
--- new ---------------------------------------------------
+--  ---------------------------------------------------
 USE `bourse`;
 DROP PROCEDURE IF EXISTS `cr_dynamic_calculation_candlestick_graph`;
 
@@ -188,6 +188,87 @@ CROSS JOIN (SELECT @row_number:=0) AS t  -- Row numbering
 ORDER BY g.time_interval ASC)tab;'
     );
     
+    
+    -- Prepare and Execute Statement
+    PREPARE stmt FROM @sql_text;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+
+DELIMITER ;
+
+-- new -------------------------------------------
+USE `bourse`;
+DROP PROCEDURE IF EXISTS `cr_dynamic_calculation_volume_graph`;
+
+DELIMITER $$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `cr_dynamic_calculation_volume_graph`(
+    IN fromDate VARCHAR(255),
+    IN toDateDate VARCHAR(255),
+    IN tableName VARCHAR(255),
+    IN period VARCHAR(10)
+)
+BEGIN
+    DECLARE interval_seconds INT;
+    DECLARE sqlTxt VARCHAR(5000);
+
+    -- Setting SQL mode
+    SET GLOBAL sql_mode = '';
+    SET SESSION sql_mode = '';  
+
+    -- Convert period to seconds for grouping
+    CASE period
+        WHEN '1m'  THEN SET interval_seconds = 60;
+        WHEN '5m' THEN SET interval_seconds = 300;
+        WHEN '15m' THEN SET interval_seconds = 900;
+        WHEN '1h'  THEN SET interval_seconds = 3600;
+        WHEN '4h'  THEN SET interval_seconds = 14400;
+        WHEN '1d'  THEN SET interval_seconds = 86400;
+        ELSE SET interval_seconds = 3600; -- Default to 1 hour if invalid period
+    END CASE;
+    
+    SET @sql_text = CONCAT(
+			 'WITH grouped_data AS (
+			  SELECT 
+				FROM_UNIXTIME(
+				  FLOOR(
+					UNIX_TIMESTAMP(start_time) / ', interval_seconds, '
+				  ) * ', interval_seconds, '
+				) AS time_interval, 
+				sum(volume) as volume,
+				MIN(start_time) AS first_start_time, 
+				MAX(start_time) AS last_start_time -- Used for Close price
+			  FROM 
+				`', tableName, '` 
+			  WHERE 
+				start_time BETWEEN ''', fromDate, ''' AND ''', toDateDate, '''
+			  GROUP BY 
+				time_interval
+			) 
+			SELECT 
+			  (@row_number := @row_number + 1) AS id, 
+			  DATE_FORMAT(time_interval, ''%d-%b-%y %H:%i'') AS x, 
+			  volume AS y 
+			from 
+			  (
+				select  
+				  g.volume,  
+				  g.time_interval 
+				FROM 
+				  grouped_data g 
+				  LEFT JOIN `', tableName, '` o ON g.first_start_time = o.start_time -- Fetch Open price
+				  LEFT JOIN `', tableName, '` c ON g.last_start_time = c.start_time -- Fetch Close price
+				  CROSS 
+				  JOIN (
+					SELECT 
+					  @row_number := 0
+				  ) AS t -- Row numbering
+				ORDER BY 
+				  g.time_interval ASC
+			  ) tab;'
+
+    );
     
     -- Prepare and Execute Statement
     PREPARE stmt FROM @sql_text;

@@ -1,10 +1,12 @@
 var chart;
+var chartLine;
+
 $(function() {
 	"use strict";
 
 
 	const fromdate = "2025-02-15 00:00:00"; //formatDate(combineDateAndTime($("#dateFrom").val(),fromDate));
-	const todate = "2025-02-16 00:00:00"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
+	const todate = "2025-02-17 00:00:00"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
 
 	var ohlcBox = document.getElementById("ohlc-info");
 
@@ -24,14 +26,33 @@ $(function() {
 		timeout: 600000,
 		success: function(response) {
 			console.log(response);
-			response.dataNormal.data.forEach(item => {
+
+			response.dataCandle.data.forEach(item => {
 				item.y = JSON.parse(item.y);
 			});
 
+			let data2 = response.dataVolume.data;
+			let volumeData = [];
+			let volumeColors = []; // ✅ Array to hold bar colors
+
+			// ✅ Loop through candle data and assign volume colors
+			response.dataCandle.data.forEach((candle, index) => {
+				let open = candle.y[0];
+				let close = candle.y[3];
+				let volume = data2[index]; // Ensure volume aligns with the candle data
+
+				volumeData.push({
+					x: candle.x, // Timestamp
+					y: volume    // Volume value
+				});
+
+				// ✅ Set color based on bullish/bearish candle
+				volumeColors.push(close >= open ? "#00E396" : "#FF4560"); // Green for up, Red for down
+			});
 
 			// Extract last candle's OHLC values
-			let lastCandleIndex = response.dataNormal.data.length - 1;
-			let lastCandle = response.dataNormal.data[lastCandleIndex];
+			let lastCandleIndex = response.dataCandle.data.length - 1;
+			let lastCandle = response.dataCandle.data[lastCandleIndex];
 
 			let open = lastCandle.y[0]; // Open
 			let high = lastCandle.y[1]; // High
@@ -48,11 +69,14 @@ $(function() {
 
 			var options = {
 				series: [{
-					data: response.dataNormal.data
+					data: response.dataCandle.data
 				}],
 				chart: {
+					id: 'chart2',
+					group: 'candle',
 					toolbar: {
 						show: true,
+						autoSelected: 'pan',
 						offsetX: 0,
 						offsetY: 0,
 						tools: {
@@ -88,11 +112,23 @@ $(function() {
 						}
 					},
 				},
+				plotOptions: {
+        candlestick: {
+            colors: {
+                upward: "#00E396",  // ✅ Bullish candles (Green)
+                downward: "#FF4560" // ✅ Bearish candles (Red)
+            },
+            wick: {
+                useFillColor: true // ✅ Ensures wicks match the candle body color
+            }
+        }
+    },
 				title: {
 					align: 'left'
 				},
 				xaxis: {
 					labels: {
+						 show: false,
 						style: {
 							fontSize: '12px',
 							fontFamily: 'Helvetica, Arial, sans-serif',
@@ -101,23 +137,23 @@ $(function() {
 						},
 					},
 					type: 'datetime',
-				    tickAmount: 6, 
-				       crosshairs: {
-                        show: true,  // ✅ Fix: Ensure the vertical line appears
-                        width: 1,
-                        position: "back",
-                        stroke: {
-                            color: "#ffffff",
-                            width: 1,
-                            dashArray: 3
-                        }
-                    },
-				    axisTicks: { show: false },  // ✅ Remove extra minor ticks
-                    axisBorder: { show: true }   // Keep only main labels
-					,tooltip: { enabled: false },
+					tickAmount: 6,
+					crosshairs: {
+						show: true,  // ✅ Fix: Ensure the vertical line appears
+						width: 1,
+						position: "front",
+						stroke: {
+							color: "#ffffff",
+							width: 1,
+							dashArray: 3
+						}
+					},
+					axisTicks: { show: false },  // ✅ Remove extra minor ticks
+					axisBorder: { show: true }   // Keep only main labels
+					, tooltip: { enabled: false },
 				},
 				yaxis: {
-					labels: {
+					labels: { 
 						style: {
 							fontSize: '12px',
 							fontFamily: 'Helvetica, Arial, sans-serif',
@@ -125,26 +161,36 @@ $(function() {
 							cssClass: 'fill-white',
 						},
 					},
-					tooltip: { enabled: false },// Show price tooltip on Y-axis
+					crosshairs: {
+						show: true,  // ✅ Fix: Ensure the vertical line appears
+						width: 1,
+						position: "front",
+						stroke: {
+							color: "#ffffff",
+							width: 1,
+							dashArray: 3
+						}
+					},
+					tooltip: { enabled: true },// Show price tooltip on Y-axis
 
 				},
 				tooltip: {
-				    enabled: true,  // ✅ Must be enabled for vertical hover line to work
-				    custom: function({ series, seriesIndex, dataPointIndex, w }) {
-				        return '';  // ✅ Hide tooltip content (no number bubble)
-				    },
-				    style: {
-				        fontSize: '0px'  // ✅ Hide tooltip text
-				    },
-				    marker: {
-				        show: false  // ✅ No tooltip markers
-				    },
-				    y: {
-				        show: false  // ✅ No Y-axis tooltip
-				    },
-				    x: {
-				        show: false  // ✅ No X-axis tooltip
-				    }
+					enabled: true,  // ✅ Must be enabled for vertical hover line to work
+					custom: function({ series, seriesIndex, dataPointIndex, w }) {
+						return '';  // ✅ Hide tooltip content (no number bubble)
+					},
+					style: {
+						fontSize: '0px'  // ✅ Hide tooltip text
+					},
+					marker: {
+						show: false  // ✅ No tooltip markers
+					},
+					y: {
+						show: false  // ✅ No Y-axis tooltip
+					},
+					x: {
+						show: false  // ✅ No X-axis tooltip
+					}
 				},
 				grid: {
 					show: true,
@@ -162,10 +208,93 @@ $(function() {
 						}
 					},
 				},
+				
 			};
 
 			chart = new ApexCharts(document.querySelector("#main-chart"), options);
 			chart.render();
+
+
+			var optionsLine = {
+				series: [{
+					name: 'volume',
+					type: 'bar',
+					data: data2
+				}],
+				chart: {
+					id: 'chart1',
+					height: 130,
+					type: 'bar',
+					group: 'candle',
+					toolbar: {
+						show: false,
+					}
+				},
+				colors: volumeColors,
+				plotOptions: {
+					bar: {
+						distributed: true,
+					}
+				},
+				xaxis: {
+					type: 'datetime',
+					tooltip: {
+						enabled: false
+					},
+					labels: {
+						style: {
+							fontSize: '12px',
+							fontFamily: 'Helvetica, Arial, sans-serif',
+							fontWeight: 400,
+							cssClass: 'fill-white',
+						},
+					},
+				},
+				yaxis: {
+					labels: {
+							formatter: function(value) {
+			                return value.toFixed(2); 
+			            },
+						style: {
+							fontSize: '12px',
+							fontFamily: 'Helvetica, Arial, sans-serif',
+							fontWeight: 400,
+							cssClass: 'fill-white',
+						},
+					},
+				},
+				dataLabels: {
+					enabled: false,
+				},
+				tooltip: {
+					enabled: true, 
+					shared: true, // ✅ Ensures tooltips appear together on both charts
+        			intersect: false ,// ✅ Ensures hover aligns on the same date // ✅ Must be enabled for vertical hover line to work
+					custom: function({ series, seriesIndex, dataPointIndex, w }) {
+						return '';  // ✅ Hide tooltip content (no number bubble)
+					},
+					style: {
+						fontSize: '0px'  // ✅ Hide tooltip text
+					},
+					marker: {
+						show: false  // ✅ No tooltip markers
+					},
+					y: {
+						show: false  // ✅ No Y-axis tooltip
+					},
+					x: {
+						show: false  // ✅ No X-axis tooltip
+					}
+				},
+				   legend: {
+			          show: false
+			        },
+			};
+
+			chartLine = new ApexCharts(document.querySelector("#chart-line"), optionsLine);
+			chartLine.render();
+
+
 			$("#loading-spinner").hide();
 
 		},
@@ -193,8 +322,8 @@ function changeTimeframe(timeframe) {
 
 function updateChart(timeframe) {
 
-	const fromdate = "2025-02-11 00:00:00"; //formatDate(combineDateAndTime($("#dateFrom").val(),fromDate));
-	const todate = "2025-02-12 00:00:00"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
+	const fromdate = "2025-02-15 00:00:00"; //formatDate(combineDateAndTime($("#dateFrom").val(),fromDate));
+	const todate = "2025-02-17 00:00:00"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
 
 	var ohlcBox = document.getElementById("ohlc-info");
 
@@ -216,7 +345,7 @@ function updateChart(timeframe) {
 		timeout: 600000,
 		success: function(response) {
 			console.log(response);
-			response.dataNormal.data.forEach(item => {
+			response.dataCandle.data.forEach(item => {
 				item.y = JSON.parse(item.y);
 			});
 
@@ -224,7 +353,7 @@ function updateChart(timeframe) {
 			if (!chart) {
 				chart = new ApexCharts(document.querySelector("#chart"), {
 					series: [{
-						data: response.dataNormal.data
+						data: response.dataCandle.data
 					}],
 					chart: {
 						type: 'candlestick',
@@ -235,9 +364,28 @@ function updateChart(timeframe) {
 				});
 				chart.render();
 			} else {
-				chart.updateSeries([{ data: response.dataNormal.data }]);
+				chart.updateSeries([{ data: response.dataCandle.data }]);
 				$("#loading-spinner").hide();
 			}
+
+			if (!chartLine) {
+				chartLine = new ApexCharts(document.querySelector("#chart-line"), {
+					series: [{
+						data: response.dataVolume.data
+					}],
+					chart: {
+						type: 'bar',
+						height: 350
+					},
+					xaxis: { type: 'datetime' },
+					yaxis: { tooltip: { enabled: true } }
+				});
+				chartLine.render();
+			} else {
+				chartLine.updateSeries([{ data: response.dataVolume.data }]);
+				$("#loading-spinner").hide();
+			}
+
 
 		},
 		error: function(e) {
