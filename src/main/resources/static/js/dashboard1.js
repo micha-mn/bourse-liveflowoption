@@ -1,6 +1,34 @@
 var chart;
 var chartLine;
+var livepriceData;
 
+   $(document).ready(function () {
+      $("#dateFrom, #dateTo").datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        minDate: 0, // Prevent past dates
+        onSelect: function () {
+            updateDateVariables();
+        }
+    });
+
+    function updateDateVariables() {
+        const fromDateValue = $("#dateFrom").val();
+        const toDateValue = $("#dateTo").val();
+
+        // Ensure the values are set before formatting
+        if (fromDateValue && toDateValue) {
+            const fromdate = `${fromDateValue} 00:00:00`;
+            const todate = `${toDateValue} 00:00:00`;
+
+            console.log("From Date:", fromdate);
+            console.log("To Date:", todate);
+
+            // Use these variables wherever needed
+        }
+    }
+    });
 $(function() {
 	"use strict";
 
@@ -14,9 +42,27 @@ $(function() {
 		"fromDate": fromdate,
 		"toDate": todate,
 		"cryptoCurrencyCode": "BTC",
+		"dataType":"NORMAL",
 		"period": $(".btn-group .btn.active").text().trim()
 		// "cryptoCurrencyCode": $("#currencyDropDown").val(),
 	};
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: "/getGraphData",
+		data: JSON.stringify(dataParam),
+		dataType: 'json',
+		timeout: 600000,
+		success: function(response) {
+			livepriceData=response.dataNormal.data;
+			},
+				error: function(e) {
+
+			console.log("ERROR : ", e);
+
+		}
+	});
+	
 	$.ajax({
 		type: "POST",
 		contentType: "application/json; charset=utf-8",
@@ -70,6 +116,10 @@ $(function() {
 			var options = {
 				series: [{
 					data: response.dataCandle.data
+				},
+				{
+					data: livepriceData,
+					type:'line'
 				}],
 				chart: {
 					id: 'chart2',
