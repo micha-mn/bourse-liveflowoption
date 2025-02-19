@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,12 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.data.synchronisation.springboot.data.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.domain.entity.CrBTCHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrBinanceHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrEthereumHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrShibaHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrSolanaHighLow;
 import com.data.synchronisation.springboot.domain.entity.CrXrpHighLow;
+import com.data.synchronisation.springboot.enums.CryptoSymbol;
 import com.data.synchronisation.springboot.repositories.CrBTCHighLowRepository;
 import com.data.synchronisation.springboot.repositories.CrBinanceHighLowRepository;
 import com.data.synchronisation.springboot.repositories.CrEthereumHighLowRepository;
@@ -260,6 +264,29 @@ public class CryptoAnalyseHighLowService {
 			} catch (Exception e) {
 				log.error("Error fetching market cap data from CoinGecko: " + e.getMessage());
 				return Collections.emptyMap();
+			}
+		}
+
+		public void runDailyCryptoTask(String fromDate, String toDate) {
+			
+			for (int i = 0; i < BINANCE_SYMBOLS.length; i++) {
+			
+		        CryptoSymbol symbol = CryptoSymbol.fromString(BINANCE_SYMBOLS[i]);
+		    	String tableName = symbol.getTableName(); 
+		    	String groupId = symbol.getGroupId(); 
+		    	
+		   		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_dynamic_calculation_daily_data");
+		   		query.registerStoredProcedureParameter("fromDate", String.class, ParameterMode.IN);
+				query.setParameter("fromDate", fromDate);
+				query.registerStoredProcedureParameter("toDateDate", String.class, ParameterMode.IN);
+				query.setParameter("toDateDate", toDate);
+				query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
+				query.setParameter("tableName", tableName);
+				query.registerStoredProcedureParameter("groupId", String.class, ParameterMode.IN);
+				query.setParameter("groupId", groupId);
+				query.execute();
+				
+				 entityManager.clear();  // Keep clear() to free resources, but remove close()
 			}
 		}
 

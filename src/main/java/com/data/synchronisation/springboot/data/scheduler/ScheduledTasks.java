@@ -5,9 +5,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
@@ -391,6 +393,22 @@ public class ScheduledTasks {
 			cryptoAnalyseHighLowService.fetchCryptoData(startTime, endTime);
 
 			System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
+		}
+	    
+	    @Scheduled(cron = "0 5 0 * * ?")// Runs at 00:05 AM every day
+	   public void runDailyCryptoTask() {
+	        System.out.println("Scheduled task running at 00:05 AM...");
+
+	        // Get yesterday's date
+	        LocalDate yesterday = LocalDate.now().minusDays(1);
+	        
+	        // Format the date (YYYY-MM-DD format)
+	        String fromDate = yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 00:00:00";
+	        String toDate = yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 23:59:00";
+	        
+	        cryptoAnalyseHighLowService.runDailyCryptoTask(fromDate, toDate);
+	       
+			System.out.println("runDailyCryptoTask Task Executed: " + fromDate + " to " + toDate);
 		}
 	    
 	    /**
