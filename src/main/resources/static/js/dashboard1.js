@@ -33,8 +33,8 @@ $(function() {
 	"use strict";
 
 
-	const fromdate = "2025-02-15 00:00:00"; //formatDate(combineDateAndTime($("#dateFrom").val(),fromDate));
-	const todate = "2025-02-17 00:00:00"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
+	const fromdate = "2025-01-31 21:31:02"; //formatDate(combineDateAndTime($("#dateFrom").val(),fromDate));
+	const todate = "2025-01-31 21:36:04"; // formatDate(combineDateAndTime($("#dateTo").val(),toDate));
 
 	var ohlcBox = document.getElementById("ohlc-info");
 
@@ -51,6 +51,7 @@ $(function() {
 		contentType: "application/json; charset=utf-8",
 		url: "/getGraphData",
 		data: JSON.stringify(dataParam),
+		async: false,
 		dataType: 'json',
 		timeout: 600000,
 		success: function(response) {

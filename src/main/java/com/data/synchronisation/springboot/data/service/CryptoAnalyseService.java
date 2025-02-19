@@ -582,6 +582,8 @@ public class CryptoAnalyseService {
 		
 		LocalDateTime fromDate = LocalDateTime.parse(req.getFromDate(), formatter);
 		LocalDateTime toDate = LocalDateTime.parse(req.getToDate(), formatter);
+		GraphGeneralResponseDTO respMax = null;
+		GraphGeneralResponseDTO respMin = null;
 		
 		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_data_for_graph",GraphResponseDTO.class);
    		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
@@ -594,7 +596,7 @@ public class CryptoAnalyseService {
    		query.setParameter("period",0 );
    		query.registerStoredProcedureParameter("currencytype", String.class, ParameterMode.IN);
    		// query.setParameter("currencytype",req.getDataType());
-   		query.setParameter("currencytype","NORMAL");
+   		query.setParameter("currencytype",req.getDataType());
    		List<GraphResponseDTO> graphNormalResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
    		entityManager.clear();
 		entityManager.close();
@@ -604,7 +606,7 @@ public class CryptoAnalyseService {
 				.build();
 		
 		
-		
+		/*
 		query = this.entityManager.createStoredProcedureQuery("cr_data_for_graph",GraphResponseDTO.class);
    		query.registerStoredProcedureParameter("cryptoCurrency", String.class, ParameterMode.IN);
    		query.setParameter("cryptoCurrency",req.getCryptoCurrencyCode() );
@@ -620,7 +622,7 @@ public class CryptoAnalyseService {
    		List<GraphResponseDTO> graphMaxResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
    		entityManager.clear();
 		entityManager.close();
-		GraphGeneralResponseDTO respMax = GraphGeneralResponseDTO.builder()
+		respMax = GraphGeneralResponseDTO.builder()
 				.data(graphMaxResponseDTOlst)
 				//.name(req.getDataType())
 				.name("MAX")
@@ -644,12 +646,12 @@ public class CryptoAnalyseService {
    		List<GraphResponseDTO> graphRespMinResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
    		entityManager.clear();
 		entityManager.close();
-		GraphGeneralResponseDTO respMin = GraphGeneralResponseDTO.builder()
+		respMin = GraphGeneralResponseDTO.builder()
 				.data(graphRespMinResponseDTOlst)
 				//.name(req.getDataType())
 				.name("MIN")
 				.build();	
-		
+		*/
 		
 		GraphFulllResponseDTO resp = GraphFulllResponseDTO.builder()
 				.dataMax(respMax)

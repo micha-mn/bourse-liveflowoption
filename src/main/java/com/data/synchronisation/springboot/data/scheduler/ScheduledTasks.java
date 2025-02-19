@@ -119,6 +119,8 @@ public class ScheduledTasks {
 			e.printStackTrace();
 		}
 	}
+	
+	
 
     
 	// @Scheduled(fixedRate = 200000)  // 20000   300000
@@ -371,6 +373,9 @@ public class ScheduledTasks {
 		trend line
 		
         */
+	
+	    // each five minute get market cap
+	    //get candles and save it 
 	    @Scheduled(cron = "0 0/1 * * * ?")
 		//@Scheduled(cron = "*/1 * * * * ?")
 		public void schedule1HourIntervals() {
@@ -395,6 +400,7 @@ public class ScheduledTasks {
 			System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
 		}
 	    
+
 	    @Scheduled(cron = "0 5 0 * * ?")// Runs at 00:05 AM every day
 	   public void runDailyCryptoTask() {
 	        System.out.println("Scheduled task running at 00:05 AM...");
@@ -431,6 +437,10 @@ public class ScheduledTasks {
 			first resistent level
 			second resistent point
 			bollinger
+			
+			golden entry fibonacci
+			order book
+			ratio to btc
 	     * */
 	    
 	    /*

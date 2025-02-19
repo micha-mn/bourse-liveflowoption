@@ -13,7 +13,7 @@ public class GraphDataReqDTO {
 	private Long id;
     private String fromDate;
     private String toDate;
-    private String dataType;  // normal max min
+    private String dataType;  // normal max min 
     private String cryptoCurrencyCode;
-    private String period;
+    private String period;   // 1 min 5 min ...
 }

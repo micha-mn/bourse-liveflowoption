@@ -86,6 +86,9 @@ public class CryptoAnalyseController {
 	public GraphFulllResponseDTO getGraphData(@RequestBody GraphDataReqDTO req) {
 		return cryptoAnalyseService.getGraphData(req);
 	}
+	
+	
+	// to get candle
 	@PostMapping(value = "getCandleGraphData")
 	public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
 		return cryptoAnalyseService.getCandleGraphData(req);
