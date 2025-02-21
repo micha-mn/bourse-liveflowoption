@@ -53,6 +53,10 @@ public class CrBTCHighLow {
    private LocalDateTime startTime;
 	@Column(name = "end_time")
    private LocalDateTime endTime;
+   @Column(name = "start_timestamp", nullable = false)
+	private Long startTimeStamp;
+   @Column(name = "end_timestamp", nullable = false)
+	private Long endTimeStamp;
 	@Column(name = "refer_date" ,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	   private LocalDateTime referDate;
 }

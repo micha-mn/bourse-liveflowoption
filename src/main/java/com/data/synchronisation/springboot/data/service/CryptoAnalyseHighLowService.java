@@ -89,20 +89,17 @@ public class CryptoAnalyseHighLowService {
 
 			if (binanceSymbol.equalsIgnoreCase("BTCUSDT") && !intlData.isEmpty()) {
 
-				System.out.println("high "+intlData.getOrDefault("high", "0"));
-				System.out.println("low "+intlData.getOrDefault("low", "0"));
-				System.out.println("volume "+intlData.getOrDefault("volume", "0"));
-				System.out.println("open "+intlData.getOrDefault("open", "0"));
-				System.out.println("close "+intlData.getOrDefault("close", "0"));
-				
 				CrBTCHighLow entity = CrBTCHighLow.builder()
 						.high(new BigDecimal(intlData.getOrDefault("high", "0").toString()))
 						.low(new BigDecimal(intlData.getOrDefault("low", "0").toString()))
 						.volume(new BigDecimal(intlData.getOrDefault("volume", "0").toString()))
 						.marketcap(marketCapValue) // Remove commas and convert
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
-						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
+						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString()))
+						.startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 
@@ -226,12 +223,14 @@ public class CryptoAnalyseHighLowService {
 			if (response != null && !response.isEmpty()) {
 				List<Object> firstCandle = response.get(0); // First candle
 				List<Object> lastCandle = response.get(response.size() - 1); // Last candle
-
+				
+				data.put("startTime", firstCandle.get(0));
 				data.put("open", firstCandle.get(1));
 				data.put("close", lastCandle.get(4));
 				data.put("high", lastCandle.get(2));
 				data.put("low", lastCandle.get(3));
 				data.put("volume", lastCandle.get(5));
+				data.put("endTime", firstCandle.get(6));
 			}
 			return data;
 		} catch (Exception e) {
