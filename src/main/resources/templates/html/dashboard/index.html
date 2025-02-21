@@ -20,6 +20,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
   <!--main css-->
   <link href="/css/bootstrap-extended.css" rel="stylesheet">
   <link href="/css/main.css" rel="stylesheet">
@@ -717,12 +718,13 @@
                       </div>
                     </div>
                      <div class="d-flex align-items-center">
-                    <div class="container d-flex mt-3">
-						<label for="dateFrom">Start Date:</label>
-						<input type="text" id="dateFrom" class="form-control" placeholder="Select Start Date">
-						
-						<label for="dateTo" class="mt-2">End Date:</label>
-						<input type="text" id="dateTo" class="form-control" placeholder="Select End Date">
+	                    <div class="mb-3">
+							<label class="form-label">From</label>
+							<input type="text" class="form-control date-time" id="fromDate">
+						</div>
+						  <div class="mb-3">
+							<label class="form-label">To</label>
+							<input type="text" class="form-control date-time" id="toDate">
 						</div>
                     </div>
                     <div class="d-flex align-items-center w-100 gap-5">
@@ -803,7 +805,8 @@
   <script src="/js/plugins/apexchart/apexcharts.min.js"></script>
   <script src="/js/plugins/simplebar/js/simplebar.min.js"></script>
   <script src="/js/plugins/peity/jquery.peity.min.js"></script>
-  
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
   <script src="/js/main-dashboard.js"></script>
   <script src="/js/dashboard1.js"></script>
  
