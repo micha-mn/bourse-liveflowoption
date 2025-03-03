@@ -1,22 +1,31 @@
 package com.data.synchronisation.springboot;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
+import javax.websocket.ContainerProvider;
+import javax.websocket.DeploymentException;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 //import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
-import com.data.synchronisation.springboot.data.advice.RestTemplateErrorHandler;
+import com.data.synchronisation.springboot.advice.RestTemplateErrorHandler;
+import com.data.synchronisation.springboot.websocket.orderBook.client.BinanceOrderBookClient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
+@EnableWebSocket
 public class Application {
 
 	public static void main(String[] args) {
@@ -64,6 +74,10 @@ public class Application {
             }
         };
     }*/
+	 
+	 
+	 
+
 }
 
 /*

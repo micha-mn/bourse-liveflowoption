@@ -1,0 +1,21 @@
+package com.data.synchronisation.springboot.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor 
+@AllArgsConstructor
+public class GraphDataReqDTO {
+	private Long id;
+    private String fromDate;
+    private String toDate;
+    private String dataType;  // normal max min 
+    private String cryptoCurrencyCode; //btc
+    private String period;   // 1 min 5 min ...
+    private String action;   // sell buy
+    private int minutes;   // used for order book
+}
