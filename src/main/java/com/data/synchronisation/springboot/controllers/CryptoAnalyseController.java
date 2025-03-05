@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.data.synchronisation.springboot.domain.entity.CrBTCHighLow;
+import com.data.synchronisation.springboot.domain.entity.CrBinanceHighLow;
+import com.data.synchronisation.springboot.domain.entity.CrEthereumHighLow;
+import com.data.synchronisation.springboot.domain.entity.CrShibaHighLow;
+import com.data.synchronisation.springboot.domain.entity.CrSolanaHighLow;
+import com.data.synchronisation.springboot.domain.entity.CrXrpHighLow;
 import com.data.synchronisation.springboot.dto.CurrencyDTO;
 import com.data.synchronisation.springboot.dto.DataDTO;
 import com.data.synchronisation.springboot.dto.GraphDataReqDTO;
@@ -27,6 +33,7 @@ import com.data.synchronisation.springboot.dto.SupportResistantPointsDTO;
 import com.data.synchronisation.springboot.dto.TradeHistoryResDTO;
 import com.data.synchronisation.springboot.dto.TradeReqDTO;
 import com.data.synchronisation.springboot.dto.TradeResponseDTO;
+import com.data.synchronisation.springboot.service.CryptoAnalyseHighLowService;
 import com.data.synchronisation.springboot.service.CryptoAnalyseService;
 
 
@@ -35,9 +42,14 @@ public class CryptoAnalyseController {
 
 	@Autowired
 	private final CryptoAnalyseService cryptoAnalyseService;
+	
+	@Autowired
+	private final CryptoAnalyseHighLowService cryptoAnalyseHighLowService;
 
-	public CryptoAnalyseController(CryptoAnalyseService cryptoAnalyseService) {
+	public CryptoAnalyseController(CryptoAnalyseService cryptoAnalyseService , 
+								   CryptoAnalyseHighLowService cryptoAnalyseHighLowService) {
 		this.cryptoAnalyseService = cryptoAnalyseService;
+		this.cryptoAnalyseHighLowService = cryptoAnalyseHighLowService;
 	}
 
 	@RequestMapping(value = "/input-screen")
@@ -123,6 +135,36 @@ public class CryptoAnalyseController {
 		List<CurrencyDTO> resp = cryptoAnalyseService.getCurrencyList();
 		return new ResponseEntity<>(resp,HttpStatus.OK);
 	}
+
+	@GetMapping(value = "/api/btc/latest")
+	   public ResponseEntity<CrBTCHighLow> getLatestBtc() {
+		 return cryptoAnalyseHighLowService.getLatestBtc().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+	@GetMapping(value = "/api/eth/latest")
+	   public ResponseEntity<CrEthereumHighLow> getLatestEthereum() {
+		 return cryptoAnalyseHighLowService.getLatestEthereum().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
 	
+	@GetMapping(value = "/api/sol/latest")
+	   public ResponseEntity<CrSolanaHighLow> getLatestSolana() {
+		 return cryptoAnalyseHighLowService.getLatestSolana().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
 	
+
+	@GetMapping(value = "/api/shib/latest")
+	   public ResponseEntity<CrShibaHighLow> getLatestShiba() {
+		 return cryptoAnalyseHighLowService.getLatestShiba().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
+	
+
+	@GetMapping(value = "/api/bnb/latest")
+	   public ResponseEntity<CrBinanceHighLow> getLatestBinance() {
+		 return cryptoAnalyseHighLowService.getLatestBinance().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
+	
+	@GetMapping(value = "/api/xrp/latest")
+	   public ResponseEntity<CrXrpHighLow> getLatestXrp() {
+		 return cryptoAnalyseHighLowService.getLatestXrp().map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+ }
 }

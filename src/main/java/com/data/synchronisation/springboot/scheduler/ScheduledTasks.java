@@ -424,10 +424,10 @@ public class ScheduledTasks {
 		
         */
 	
-	    // each five minute get market cap
+	    // each 1 minute get market cap
 	    //get candles and save it 
-	//    @Scheduled(cron = "0 0/1 * * * ?")
-		public void schedule1HourIntervals() {
+	    @Scheduled(cron = "0 0/1 * * * ?")
+		public void schedule1MinuteIntervals() {
 
 			// Calculate the current interval's start and end times
 	    	
@@ -446,11 +446,11 @@ public class ScheduledTasks {
 
 			cryptoAnalyseHighLowService.fetchCryptoData(startTime, endTime);
 
-			System.out.println("schedule1HourIntervals Task Executed: " + startTime + " to " + endTime);
+			System.out.println("schedule1MinuteIntervals Task Executed: " + startTime + " to " + endTime);
 		}
 	    
 
-	//    @Scheduled(cron = "0 5 0 * * ?")// Runs at 00:05 AM every day
+      @Scheduled(cron = "0 5 0 * * ?")// Runs at 00:05 AM every day
 	   public void runDailyCryptoTask() {
 	        System.out.println("Scheduled task running at 00:05 AM...");
 

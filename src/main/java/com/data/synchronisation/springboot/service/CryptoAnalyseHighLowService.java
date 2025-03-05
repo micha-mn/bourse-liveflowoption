@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.ParameterMode;
@@ -117,6 +118,8 @@ public class CryptoAnalyseHighLowService {
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
 						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 				
@@ -134,6 +137,8 @@ public class CryptoAnalyseHighLowService {
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
 						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 
@@ -151,6 +156,8 @@ public class CryptoAnalyseHighLowService {
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
 						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 
@@ -168,6 +175,8 @@ public class CryptoAnalyseHighLowService {
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
 						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 
@@ -185,6 +194,8 @@ public class CryptoAnalyseHighLowService {
 						.open(new BigDecimal(intlData.getOrDefault("open", "0").toString()))
 						.close(new BigDecimal(intlData.getOrDefault("close", "0").toString())).startTime(startTime)
 						.endTime(endTime)
+						.startTimeStamp(Long.valueOf(intlData.getOrDefault("startTime", "0").toString()))
+						.endTimeStamp(Long.valueOf(intlData.getOrDefault("endTime", "0").toString()))
 						.referDate(LocalDateTime.now())
 						.build();
 
@@ -289,5 +300,22 @@ public class CryptoAnalyseHighLowService {
 			}
 		}
 
-	
+		 public Optional<CrBTCHighLow> getLatestBtc() {
+			return  crBTCHighLowRepository.findTopByOrderByStartTimeStampDesc();
+	    }
+		public Optional<CrEthereumHighLow> getLatestEthereum() {
+			return  crEthereumHighLowRepository.findTopByOrderByStartTimeStampDesc();
+		 }
+		public Optional<CrSolanaHighLow> getLatestSolana() {
+			return  crSolanaHighLowRepository.findTopByOrderByStartTimeStampDesc();
+		 }
+		public Optional<CrShibaHighLow> getLatestShiba() {
+			return crShibaHighLowRepository.findTopByOrderByStartTimeStampDesc();
+		 }
+		public Optional<CrXrpHighLow> getLatestXrp() {
+			return  crXrpHighLowRepository.findTopByOrderByStartTimeStampDesc();
+		 }
+		public Optional<CrBinanceHighLow> getLatestBinance() {
+			return  crBinanceHighLowRepository.findTopByOrderByStartTimeStampDesc();
+		 }
 }
