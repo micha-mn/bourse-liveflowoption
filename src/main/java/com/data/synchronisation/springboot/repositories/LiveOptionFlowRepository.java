@@ -1,5 +1,6 @@
 package com.data.synchronisation.springboot.repositories;
 
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,17 +22,17 @@ public interface LiveOptionFlowRepository extends JpaRepository<LiveOptionFlow, 
 	   		+ "    product, \r\n"
 	   		+ "    COUNT(product) AS count_by_product\r\n"
 	   		+ "  FROM live_option_flow_data\r\n"
-	   		+ "   where flow_date = :date  OR flow IS NULL \r\n"
+	   		+ "   where (flow_date BETWEEN :fromDate AND :toDate)  OR flow IS NULL \r\n"
 	   		+ "  GROUP BY product \r\n"
 	   		+ ") AS subquery\r\n"
 	   		+ "ON a.product = subquery.product\r\n"
 	   		+ "WHERE\r\n"
-	   		+ "  flow_date = :date\r\n"
+	   		+ "  (flow_date BETWEEN :fromDate AND :toDate) \r\n"
 	   		+ "  OR a.flow IS NULL\r\n"
 	   		+ "ORDER BY FIELD(a.product,  'BUND', 'BOBL', 'BUXL', 'SHATZ', 'OAT', 'BTP', 'EURIBOR', 'TY'), a.flow_date DESC;"
 	   		,
 				      nativeQuery = true)
-   List<LiveOptionFlow> findLiveOptionFlowByFlowDate(@Param("date") String date);
+   List<LiveOptionFlow> findLiveOptionFlowByFlowDate(@Param("fromDate") String  fromDate, @Param("toDate") String  toDate);
    
  	 
    @Query(value =  "SELECT \r\n"

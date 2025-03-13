@@ -751,63 +751,96 @@ public class CryptoAnalyseService {
 		
 	   return orderBookResponse; 
 	}
-	
+      public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
 
-	public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
-		
-		LocalDateTime fromDate = LocalDateTime.parse(req.getFromDate(), formatter);
-		LocalDateTime toDate = LocalDateTime.parse(req.getToDate(), formatter);
-		String tableName=null;	
-		if(req.getCryptoCurrencyCode().equalsIgnoreCase("BTC"))
-			tableName="cr_btc_high_low";
-		
-		StoredProcedureQuery query = this.entityManager.createStoredProcedureQuery("cr_dynamic_calculation_candlestick_graph",GraphResponseDTO.class);
-		
-   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
-   		query.setParameter("fromDate",fromDate );
-   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
-   		query.setParameter("toDate",toDate );
-   		query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
-   		query.setParameter("tableName", tableName);
-   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
-   		query.setParameter("period",req.getPeriod() );
-   		
-   		List<GraphResponseDTO> graphNormalResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
-   		entityManager.clear();
-		entityManager.close();
-		GraphGeneralResponseDTO respNormal = GraphGeneralResponseDTO.builder()
-				.data(graphNormalResponseDTOlst)
-				.name("NORMAL")
-				.build();
-		
+    	   GraphGeneralResponseDTO candleResponse = getCandleStickData(req);
+    	   GraphGeneralResponseDTO volumeResponse = getVolumeData(req); 
+    	    return GraphFulllResponseDTO.builder()
+    	            .dataCandle(candleResponse)
+    	            .dataVolume(volumeResponse)
+    	            .build();
+    	}
 
-		query = this.entityManager.createStoredProcedureQuery("cr_dynamic_calculation_volume_graph",GraphResponseDTO.class);
-		
-   		query.registerStoredProcedureParameter("fromDate", LocalDateTime.class, ParameterMode.IN);
-   		query.setParameter("fromDate",fromDate );
-   		query.registerStoredProcedureParameter("toDate", LocalDateTime.class, ParameterMode.IN);
-   		query.setParameter("toDate",toDate );
-   		query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
-   		query.setParameter("tableName", tableName);
-   		query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
-   		query.setParameter("period",req.getPeriod() );
-   		
-   		List<GraphResponseDTO> graphVolumeResponseDTOlst = (List<GraphResponseDTO>) query.getResultList();
-   		entityManager.clear();
+    public GraphGeneralResponseDTO getCandleStickData(GraphDataReqDTO req)
+    {
+        String tableName = req.getCryptoCurrencyCode().equalsIgnoreCase("BTC") ? "cr_btc_high_low" : null;
+ 	    int pageSize = req.getSize();
+ 	    int pageNumber = req.getPage();
+
+ 	    // === First Query: Candle Data ===
+ 	    StoredProcedureQuery query = entityManager.createStoredProcedureQuery("cr_dynamic_result", GraphResponseDTO.class);
+ 	    query.registerStoredProcedureParameter("fromDate", String.class, ParameterMode.IN);
+ 	    query.setParameter("fromDate", req.getFromDate());
+ 	    query.registerStoredProcedureParameter("toDate", String.class, ParameterMode.IN); // use consistent naming
+ 	    query.setParameter("toDate", req.getToDate());
+ 	    query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
+ 	    query.setParameter("tableName", tableName);
+ 	    query.registerStoredProcedureParameter("criteria", String.class, ParameterMode.IN);
+ 	    query.setParameter("criteria", "candle");
+ 	    query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+ 	    query.setParameter("period", req.getPeriod());
+ 	    query.registerStoredProcedureParameter("pageSize", Integer.class, ParameterMode.IN);
+ 	    query.setParameter("pageSize", pageSize);
+ 	    query.registerStoredProcedureParameter("pageNumber", Integer.class, ParameterMode.IN);
+ 	    query.setParameter("pageNumber", pageNumber);
+ 	    query.registerStoredProcedureParameter("totalRecords", Integer.class, ParameterMode.OUT);
+
+ 	    query.execute();
+ 	    int totalRecords = (Integer) query.getOutputParameterValue("totalRecords");
+ 	    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+ 	    List<GraphResponseDTO> dataList = query.getResultList();
+ 	    entityManager.clear();
 		entityManager.close();
-		GraphGeneralResponseDTO respVolume= GraphGeneralResponseDTO.builder()
-				.data(graphVolumeResponseDTOlst)
-				.name("VOLUME")
-				.build();
-		
-		GraphFulllResponseDTO resp = GraphFulllResponseDTO.builder()
-				.dataCandle(respNormal)
-				.dataVolume(respVolume)
-				.build();
-	
-	   return resp; 
-	}
-	
+ 	    GraphGeneralResponseDTO response = GraphGeneralResponseDTO.builder()
+ 	            .data(dataList)
+ 	            .name("CANDLESTICKS")
+ 	            .totalRecords(totalRecords)
+ 	            .totalPages(totalPages)
+ 	            .build();
+ 	    return response;
+    }
+    
+    public GraphGeneralResponseDTO getVolumeData(GraphDataReqDTO req)
+    {
+        String tableName = req.getCryptoCurrencyCode().equalsIgnoreCase("BTC") ? "cr_btc_high_low" : null;
+ 	    int pageSize = req.getSize();
+ 	    int pageNumber = req.getPage();
+
+ 	    // === First Query: Candle Data ===
+ 	    StoredProcedureQuery query = entityManager.createStoredProcedureQuery("cr_dynamic_result", GraphResponseDTO.class);
+ 	    query.registerStoredProcedureParameter("fromDate", String.class, ParameterMode.IN);
+ 	    query.setParameter("fromDate", req.getFromDate());
+ 	    query.registerStoredProcedureParameter("toDate", String.class, ParameterMode.IN); // use consistent naming
+ 	    query.setParameter("toDate", req.getToDate());
+ 	    query.registerStoredProcedureParameter("tableName", String.class, ParameterMode.IN);
+ 	    query.setParameter("tableName", tableName);
+ 	    query.registerStoredProcedureParameter("criteria", String.class, ParameterMode.IN);
+ 	    query.setParameter("criteria", "volume");
+ 	    query.registerStoredProcedureParameter("period", String.class, ParameterMode.IN);
+ 	    query.setParameter("period", req.getPeriod());
+ 	    query.registerStoredProcedureParameter("pageSize", Integer.class, ParameterMode.IN);
+ 	    query.setParameter("pageSize", pageSize);
+ 	    query.registerStoredProcedureParameter("pageNumber", Integer.class, ParameterMode.IN);
+ 	    query.setParameter("pageNumber", pageNumber);
+ 	    query.registerStoredProcedureParameter("totalRecords", Integer.class, ParameterMode.OUT);
+
+ 	    query.execute();
+ 	    int totalRecords = (Integer) query.getOutputParameterValue("totalRecords");
+ 	    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+ 	    List<GraphResponseDTO> dataList = query.getResultList();
+ 	    entityManager.clear();
+		entityManager.close();
+ 	   GraphGeneralResponseDTO response = GraphGeneralResponseDTO.builder()
+	            .data(dataList)
+	            .name("VOLUME")
+	            .totalRecords(totalRecords)
+	            .totalPages(totalPages)
+	            .build();
+	   
+ 	    return response;
+    }
 	public SupportResistantPointsDTO getSupportResistantForGraph(@RequestBody GraphDataReqDTO req) {
 		
 		

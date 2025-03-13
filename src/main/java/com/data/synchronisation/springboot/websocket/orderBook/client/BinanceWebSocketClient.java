@@ -1,10 +1,9 @@
 package com.data.synchronisation.springboot.websocket.orderBook.client;
 
-import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import com.data.synchronisation.springboot.service.OrderBookService;
+import com.data.synchronisation.springboot.websocket.orderBook.client.core.PingAwareWebSocketClient;
 import com.data.synchronisation.springboot.websocket.orderBook.config.DepthUpdateDTO;
 import com.data.synchronisation.springboot.websocket.orderBook.dto.BinanceOrderBook;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,22 +15,24 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BinanceWebSocketClient extends WebSocketClient {
+
+public class BinanceWebSocketClient extends PingAwareWebSocketClient {
 
     private final OrderBookService orderBookService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private StringBuilder messageBuffer = new StringBuilder();
 
     public BinanceWebSocketClient(OrderBookService orderBookService) throws URISyntaxException {
-        super(new URI("wss://stream.binance.com:9443/ws/btcusdt@depth"));
+        super(new URI("wss://stream.binance.com:9443/ws/btcusdt@trade"), new Draft_6455());
         this.orderBookService = orderBookService;
+        this.setConnectionLostTimeout(60); // optional: detects dead connection
     }
 
     @Override
     public void onOpen(ServerHandshake handshake) {
-        System.out.println("✅ Connected to Binance Order Book WebSocket");
+    	System.out.println("✅ Connected to Binance Order Book WebSocket");
     }
-
+    
     @Override
     public void onMessage(String message) {
         messageBuffer.append(message);
@@ -78,7 +79,7 @@ public class BinanceWebSocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("❌ WebSocket Closed: " + reason);
+        System.out.println("❌ WebSocket Closed: " + reason + " (code: " + code + ")");
     }
 
     @Override

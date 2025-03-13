@@ -18,4 +18,6 @@ public class GraphGeneralResponseDTO {
 	
 	private String name;
 	private List<GraphResponseDTO> data;
+	private int totalRecords;
+	private int totalPages;
 }

@@ -17,5 +17,8 @@ public class GraphDataReqDTO {
     private String cryptoCurrencyCode; //btc
     private String period;   // 1 min 5 min ...
     private String action;   // sell buy
+    private String criteria;
     private int minutes;   // used for order book
+    private int page;
+    private int size;
 }
