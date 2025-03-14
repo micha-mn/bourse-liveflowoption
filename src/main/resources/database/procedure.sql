@@ -467,3 +467,139 @@ end if;
 END$$
 
 DELIMITER ;
+
+-- new 14-03-2025
+
+USE `bourse`;
+DROP procedure IF EXISTS `cr_dynamic_result`;
+;
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `cr_dynamic_result`(
+																		 IN fromDate VARCHAR(255),
+																		 IN toDate VARCHAR(255),
+																		 IN tableName VARCHAR(255),
+                                                                         IN criteria  VARCHAR(255),
+                                                                         IN period  VARCHAR(10),
+																		 IN pageSize INT,  
+																		 IN pageNumber INT,
+																		 OUT totalRecords INT  -- Declare OUT parameter properly
+																	  )
+BEGIN
+
+DECLARE offsetValue INT;
+DECLARE sqlTxt varchar(255);
+DECLARE sqlTxtFinal varchar(255);
+
+	SET GLOBAL sql_mode = '';
+	SET SESSION sql_mode = '';  
+    
+   SET offsetValue = pageSize * pageNumber;
+   
+       -- Convert period to seconds for grouping
+ CASE period
+    WHEN '5m' THEN
+      SET @period_expression = CONCAT(
+        'CONCAT(',
+        '  DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), '' '',',
+        '  LPAD(HOUR(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), 2, ''0''), '':'',',
+        '  LPAD(FLOOR(MINUTE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s''))/5)*5, 2, ''0'')',
+        ')'
+      );
+
+    WHEN '15m' THEN
+      SET @period_expression = CONCAT(
+        'CONCAT(',
+        '  DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), '' '',',
+        '  LPAD(HOUR(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), 2, ''0''), '':'',',
+        '  LPAD(FLOOR(MINUTE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s''))/15)*15, 2, ''0'')',
+        ')'
+      );
+
+    WHEN '1h'  THEN 
+      SET @period_expression = CONCAT(
+        'CONCAT(',
+        '  DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), '' '',',
+        '  LPAD(HOUR(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), 2, ''0''), '':00:00''',
+        ')'
+      );
+
+    WHEN '4h'  THEN
+      SET @period_expression = CONCAT(
+        'CONCAT(',
+        '  DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')), '' '',',
+        '  LPAD(FLOOR(HOUR(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s''))/4)*4, 2, ''0''), '':00:00''',
+        ')'
+      );
+		
+    WHEN '1d'  THEN SET @period_expression = 'DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s''))';
+    ELSE SET @period_expression = 'DATE(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s''))';  -- Default to daily grouping
+END CASE;
+    
+      -- Step 1: Get total count of grouped records and store it in `totalRecords`
+    SET @sql_count = CONCAT(
+        'SELECT COUNT(DISTINCT ', @period_expression, ') INTO @tempTotalRecords
+         FROM `', tableName, '` 
+         WHERE DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'') BETWEEN ''', fromDate, ''' AND ''', toDate, ''';'
+    );
+
+    PREPARE stmt_count FROM @sql_count;
+    EXECUTE stmt_count;
+    DEALLOCATE PREPARE stmt_count;
+
+    -- Assign the temporary total count to the OUT parameter
+    SET totalRecords = @tempTotalRecords;
+
+	 SET @sql_text:= CONCAT( 'WITH grouped_data AS ( 
+								SELECT 
+		                        ', @period_expression, ' AS time_interval,
+								MIN(low) AS min_low,
+								MAX(high) AS max_high,
+								MIN(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')) AS first_start_time,  -- Used for Open price
+								MAX(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')) AS last_start_time,   -- Used for Close price
+								sum(volume) as volume
+							FROM `', tableName, '`
+									WHERE  (DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'') between ''', fromDate, ''' AND ''', toDate, ''' )
+							GROUP BY time_interval
+				)
+		  select  (@row_number:=@row_number + 1) AS id,
+							s1.* 
+				   from( 
+			 select time_interval AS start_time_utc, 
+					o.start_time as start_time, 
+					o.open as open, 
+					g.max_high as high, 
+					g.min_low as low, 
+					c.close as close,
+					mc.marketcap AS marketcap,  -- Fetch last market cap value
+					g.volume
+				FROM grouped_data g
+				LEFT JOIN `', tableName, '` o ON g.first_start_time = DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(o.start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')  -- Fetch Open price
+				LEFT JOIN `', tableName, '` c ON g.last_start_time = DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(c.start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'')   -- Fetch Close price
+				LEFT JOIN `', tableName, '` mc ON g.last_start_time = DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(mc.start_timestamp / 1000), @@session.time_zone, ''+00:00''), ''%Y-%m-%d %H:%i:%s'') -- Fetch last Market Cap
+			ORDER BY g.time_interval DESC) s1,
+            (SELECT @row_number:=0) AS t ' );
+       
+        
+    
+    if(criteria = 'volume')
+    then 
+      set @sqlTxtFinal := concat('select * from ( select id, start_time as x,volume as y from (  ', @sql_text, ' )TAB     LIMIT ', pageSize, ' OFFSET ', offsetValue, ' )tab1 ORDER BY x asc; ');
+	elseif(criteria = 'all')
+     then
+      set @sqlTxtFinal := concat('select * from ( select TAB.* from (  ', @sql_text, ' )TAB     LIMIT ', pageSize, ' OFFSET ', offsetValue, ' )tab1 ORDER BY x asc; ');
+	elseif(criteria = 'obv')
+     then
+      set @sqlTxtFinal := concat('select * from ( select TAB.* from (  ', @sql_text, ' )TAB     LIMIT ', pageSize, ' OFFSET ', offsetValue, ' )tab1 ORDER BY x asc; ');
+	elseif(criteria = 'candle')
+     then
+      set @sqlTxtFinal := concat('select * from ( select id, start_time as x,  JSON_ARRAY(open , high, low, close) as y from (  ', @sql_text, ' )TAB     LIMIT ', pageSize, ' OFFSET ', offsetValue, ' )tab1 ORDER BY x asc; ');
+	end if;
+	
+    
+    insert into tmp_cr_debugging(sqlTxtObv)
+    select @sqlTxtFinal;
+    
+    PREPARE stmt from @sqlTxtFinal;
+    EXECUTE stmt;  
+	
+END

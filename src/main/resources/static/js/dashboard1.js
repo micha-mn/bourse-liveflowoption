@@ -13,10 +13,10 @@ var todate = formatDate(todayMidnight);        // Start of today (end of yesterd
 var previousXMin = null;
 
 var page = 0;
-const size = 200;
+const size = 50;
 
 var totalPages = Infinity;
-let windowSize = 50;
+let windowSize = 25;
 	
 var allData = []; // Store fetched data
 var visibleData = []; // Store fetched data
@@ -425,11 +425,14 @@ function changeTimeframe(timeframe) {
 }
 
 function updateChart(timeframe) {
+	 fromdate = formatDate(yesterdayMidnight); // Start of yesterday
+     todate = formatDate(todayMidnight);        // Start of today (end of yesterday's full interval)
+
 	 page = 0;
 	
 	 totalPages = Infinity;
 	 windowSize = 50;
-		
+	 selectedInterval =$(".btn-group .btn.active").text().trim()	;
 	 allData = []; // Store fetched data
 	 
 	var ohlcBox = document.getElementById("ohlc-info");
