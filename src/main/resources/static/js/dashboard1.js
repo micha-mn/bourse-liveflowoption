@@ -105,8 +105,12 @@ var originalChartSettings = {
   events: {
   scrolled: function(chartContext, { xaxis }) {
     // Existing panning logic
-   if(xaxis.max<=10)
-   {	$("#loading-spinner").show();
+   if (previousXMin === null) {
+      previousXMin = xaxis.min;
+      return;
+    }
+    if (xaxis.min < previousXMin && !isFetching) 
+   	{	$("#loading-spinner").show();
 		fetchMoreCandlestickData(xaxis);
 	    if (previousXMin !== null) {
 	      if (xaxis.min < previousXMin) {
@@ -607,11 +611,12 @@ function fetchMoreCandlestickData(xaxis) {
         page++; // Increase page number
 	    console.log(response);
 			
-		$("#loading-spinner").hide();
-      // Process response and prepend to your allData array
-      response.dataCandle.data.forEach(item => {
+			$("#loading-spinner").hide();
+    	 	 // Process response and prepend to your allData array
+      		response.dataCandle.data.forEach(item => {
 				item.y = JSON.parse(item.y);
 			});
+			
             let oldData=allData.length;
  			allData = response.dataCandle.data.concat(allData);
 			let data2 = response.dataVolume.data;
