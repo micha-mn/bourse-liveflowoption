@@ -16,20 +16,48 @@ public interface CRBTCOrderBookConsolidatedRepository extends JpaRepository<CRBT
 	
 	 
 	@Query(value = "SELECT \r\n"
-			+ "  action, \r\n"
-			+ "  AVG(price) AS price,\r\n"
-			+ "  SUM(quantity) AS total_quantity,\r\n"
-			+ "  (SUM(quantity) / (\r\n"
-			+ "    SELECT SUM(quantity) \r\n"
-			+ "    FROM cr_order_book_consolidated \r\n"
-			+ "    WHERE action IN ('sell', 'buy')\r\n"
-			+ "      AND refer_date >= NOW() - INTERVAL :minutes MINUTE\r\n"
-			+ "  ) * 100) AS percentage\r\n"
-			+ "FROM cr_order_book_consolidated\r\n"
-			+ "WHERE action IN ('sell', 'buy')\r\n"
-			+ "  AND refer_date >= NOW() - INTERVAL :minutes MINUTE\r\n"
-			+ "GROUP BY action ", 
+			+ "    action,\r\n"
+			+ "    SUM(quantity * price) / SUM(quantity) AS price,\r\n"
+			+ "    SUM(quantity) AS total_volume,\r\n"
+			+ "    ROUND(\r\n"
+			+ "        (SUM(quantity) / (\r\n"
+			+ "            SELECT SUM(quantity) \r\n"
+			+ "            FROM cr_order_book_consolidated \r\n"
+			+ "            WHERE refer_date >= NOW() - INTERVAL :period HOUR \r\n"
+			+ "        )) * 100, \r\n"
+			+ "        2\r\n"
+			+ "    ) AS percentage\r\n"
+			+ "FROM \r\n"
+			+ "    cr_order_book_consolidated\r\n"
+			+ "WHERE \r\n"
+			+ "    refer_date >= NOW() - INTERVAL :period HOUR \r\n"
+			+ "GROUP BY \r\n"
+			+ "    action", 
     nativeQuery = true)
-	 List<GraphResponseProjection> getOrderBookConsolidated(@Param("minutes") int minutes);
+	 List<GraphResponseProjection> getOrderBookConsolidatedHourPeriod(@Param("period") String period);
+	
+	
+	
+	@Query(value = "SELECT \r\n"
+			+ "    action,\r\n"
+			+ "    SUM(quantity * price) / SUM(quantity) AS price,\r\n"
+			+ "    SUM(quantity) AS total_volume,\r\n"
+			+ "    ROUND(\r\n"
+			+ "        (SUM(quantity) / (\r\n"
+			+ "            SELECT SUM(quantity) \r\n"
+			+ "            FROM cr_order_book_consolidated \r\n"
+			+ "            WHERE refer_date >= NOW() - INTERVAL :period MINUTE \r\n"
+			+ "        )) * 100, \r\n"
+			+ "        2\r\n"
+			+ "    ) AS percentage\r\n"
+			+ "FROM \r\n"
+			+ "    cr_order_book_consolidated\r\n"
+			+ "WHERE \r\n"
+			+ "    refer_date >= NOW() - INTERVAL :period MINUTE \r\n"
+			+ "GROUP BY \r\n"
+			+ "    action", 
+    nativeQuery = true)
+	 List<GraphResponseProjection> getOrderBookConsolidatedMinutePeriod(@Param("period") String period);
+	  
 	  
 }

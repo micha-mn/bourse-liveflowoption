@@ -1,5 +1,6 @@
 package com.data.synchronisation.springboot.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,14 @@ public class OrderBookService {
 	 }
 	 
      public List<GraphResponseProjection> getOrderBookData(GraphDataReqDTO req) {
-    	return crBTCOrderBookConsolidatedRepository.getOrderBookConsolidated(req.getMinutes());
+    	
+    	if(req.getHmd().equalsIgnoreCase("HOUR"))
+    		return crBTCOrderBookConsolidatedRepository.getOrderBookConsolidatedHourPeriod(req.getPeriod());
+    	if(req.getHmd().equalsIgnoreCase("MINUTE"))
+    		return crBTCOrderBookConsolidatedRepository.getOrderBookConsolidatedMinutePeriod(req.getPeriod());
+    	
+    	return new ArrayList<>();
+    		
 	 }
 	 
 	 

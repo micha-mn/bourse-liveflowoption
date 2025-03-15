@@ -1,0 +1,8 @@
+curl --location --request GET 'https://localhost:9091/get-order-book' \
+--header 'Content-Type: application/json' \
+--data '{
+    "period":"1",
+    "hmd":"MINUTE"
+}
+
+-- ------------------
