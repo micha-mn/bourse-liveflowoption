@@ -647,7 +647,7 @@ function fetchMoreCandlestickData(xaxis) {
   isFetching = true;
   
   // Update your fromDate based on the earliest data in allData
-  if(totalPages==1)
+  if(totalPages < page)
   {
 	  let earliestfromdate = new Date(fromdate);
 	  let earliesttoadate = new Date(fromdate);
@@ -702,6 +702,8 @@ function fetchMoreCandlestickData(xaxis) {
 			if (rangeMax <= rangeMin) {
 			  rangeMin = Math.max(0, totalDataPoints - windowSize);
 			  rangeMax = totalDataPoints;
+			  rangeMax = rangeMax - rangeMin;
+			  rangeMin =0;
 			}
 			
 			originalXAxisOptions.min = rangeMin;

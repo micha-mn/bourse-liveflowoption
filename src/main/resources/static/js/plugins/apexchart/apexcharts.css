@@ -199,14 +199,14 @@
 .apexcharts-xaxistooltip,.apexcharts-yaxistooltip {
   opacity: 0;
   pointer-events: none;
-  color: #373d3f;
+  color: white;
   font-size: 13px;
   text-align: center;
   border-radius: 2px;
   position: absolute;
   z-index: 10;
-  background: #eceff1;
-  border: 1px solid #90a4ae
+  background: #535a60;
+  border: 1px solid #535a60
 }
 
 .apexcharts-xaxistooltip {
@@ -251,7 +251,7 @@
 }
 
 .apexcharts-xaxistooltip-bottom:after {
-  border-bottom-color: #eceff1
+  border-bottom-color: #535a60
 }
 
 .apexcharts-xaxistooltip-bottom:before {
@@ -320,7 +320,7 @@
 }
 
 .apexcharts-yaxistooltip-left:after {
-  border-left-color: #eceff1
+  border-left-color: #535a60
 }
 
 .apexcharts-yaxistooltip-left:before {
