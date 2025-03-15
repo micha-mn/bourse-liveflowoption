@@ -13,15 +13,17 @@ var todate = formatDate(todayMidnight);        // Start of today (end of yesterd
 var previousXMin = null;
 
 var page = 0;
-const size = 50;
+const size = 100;
 
 var totalPages = Infinity;
-let windowSize = 25;
+let windowSize = 50;
 	
 var allData = []; // Store fetched data
 var visibleData = []; // Store fetched data
 var isFetching = false;
 var selectedInterval =$(".btn-group .btn.active").text().trim();
+var cryptoCurrency="BTC";
+
 var originalXAxisOptions = {
   labels: {
     show: false,
@@ -219,7 +221,7 @@ var originalGridOptions = {
 // Separate Chart Settings
 var originalChartLineSettings = {
   id: 'chart1',
-  height: 130,
+  height: 500,
   type: 'bar',
   group: 'candle',
   toolbar: { show: false }
@@ -308,16 +310,78 @@ var optionsLine = {
   tooltip: originalTooltipLineOptions,
   legend: originalLegendLineOptions
 };
-     
-$(document).ready(() => {
 
+const cryptoList = [
+  {
+    "name": "Bitcoin",
+    "symbol": "BTC",
+    "icon": "/css/image/Bitcoin.svg"
+  },
+  {
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "icon": "/css/image/ethereum.svg"
+  },
+  {
+    "name": "Solana",
+    "symbol": "SOL",
+    "icon": "/css/image/solana.svg"
+  },
+  {
+    "name": "Shiba",
+    "symbol": "SHIB",
+    "icon": "/css/image/shiba.svg"
+  },
+  {
+    "name": "Binance",
+    "symbol": "BNB",
+    "icon": "/css/image/binance.svg"
+  },
+  {
+    "name": "XRP",
+    "symbol": "XRP",
+    "icon": "/css/image/xrp-logo.svg"
+  }
+];  
+  
+$(document).ready(() => {
+	
+  const $dropdown = $('#cryptoDropdown');
+  
+  cryptoList.forEach(crypto => {
+    const item = `
+      <li>
+        <a class="dropdown-item" href="#" data-symbol="${crypto.symbol}">
+          <img src="${crypto.icon}" alt="${crypto.name} Logo" width="35" height="35" class="me-2">
+          ${crypto.name}
+        </a>
+      </li>
+    `;
+    $dropdown.append(item);
+  });
+
+  // Optional: handle selection
+  $dropdown.on('click', '.dropdown-item', function (e) {
+    e.preventDefault();
+    const name = $(this).text().trim();
+    const icon = $(this).find('img').attr('src');
+    const symbol = $(this).data('symbol');
+
+    console.log("Selected:", { name, symbol, icon });
+	cryptoCurrency=symbol;
+    const parent = $(this).closest('.dropdown');
+    parent.find('.parent-icon img').attr('src', icon);
+    parent.find('.menu-title').text(name);
+    
+    	updateChart();
+  });
 
 	var ohlcBox = document.getElementById("ohlc-info");
 
 	let dataParam = {
 		"fromDate": fromdate,
 		"toDate": todate,
-		"cryptoCurrencyCode": "BTC",
+		"cryptoCurrencyCode": cryptoCurrency,
 		"period": selectedInterval,
 		 page: page,
          size: size
@@ -349,6 +413,9 @@ $(document).ready(() => {
     		let max = totalDataPoints
 			originalXAxisOptions.min=min;
 			originalXAxisOptions.max=max;
+			
+			originalXAxisLineOptions.min=min;
+			originalXAxisLineOptions.max=max;
 			
   		   let newYLimits = calculateYLimitsCandleSticks(response.dataCandle.data, min, max,10);
       		originalYAxisOptions.min = newYLimits.min;
@@ -402,7 +469,7 @@ $(document).ready(() => {
 			optionsLine.colors = volumeColors;
 
 			chartLine = new ApexCharts(document.querySelector("#chart-line"), optionsLine);
-			// chartLine.render();
+			chartLine.render();
 
 
 			$("#loading-spinner").hide();
@@ -425,10 +492,10 @@ function changeTimeframe(timeframe) {
 	event.target.classList.add("active");
 
 	// Update chart data with the selected timeframe
-	updateChart(timeframe);
+	updateChart();
 }
 
-function updateChart(timeframe) {
+function updateChart() {
 	 fromdate = formatDate(yesterdayMidnight); // Start of yesterday
      todate = formatDate(todayMidnight);        // Start of today (end of yesterday's full interval)
 
@@ -444,8 +511,8 @@ function updateChart(timeframe) {
 	let dataParam = {
 		"fromDate": fromdate,
 		"toDate": todate,
-		"cryptoCurrencyCode": "BTC",
-		"period": timeframe,
+		"cryptoCurrencyCode": cryptoCurrency,
+		"period": selectedInterval,
 		 page: page, 
          size: size
 		// "cryptoCurrencyCode": $("#currencyDropDown").val(),
@@ -592,7 +659,7 @@ function fetchMoreCandlestickData(xaxis) {
   let dataParam = {
     "fromDate": fromdate,
     "toDate": todate, // your global toDate variable
-    "cryptoCurrencyCode": "BTC",
+    "cryptoCurrencyCode": cryptoCurrency,
     "period": selectedInterval,
     page: page,
     size: size
