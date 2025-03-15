@@ -469,7 +469,7 @@ $(document).ready(() => {
 			optionsLine.colors = volumeColors;
 
 			chartLine = new ApexCharts(document.querySelector("#chart-line"), optionsLine);
-			chartLine.render();
+			//chartLine.render();
 
 
 			$("#loading-spinner").hide();
