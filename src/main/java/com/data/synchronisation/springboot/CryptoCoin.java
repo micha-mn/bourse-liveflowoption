@@ -37,10 +37,10 @@ import lombok.RequiredArgsConstructor;
 @EnableAsync
 @EnableScheduling
 @EnableWebSocket
-public class Application {
+public class CryptoCoin {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(CryptoCoin.class, args);
 	}
 	
 	 @Bean

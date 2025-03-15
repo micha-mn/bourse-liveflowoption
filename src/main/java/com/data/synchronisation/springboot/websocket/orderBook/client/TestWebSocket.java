@@ -1,9 +1,10 @@
 package com.data.synchronisation.springboot.websocket.orderBook.client;
-
-import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.WebSocket;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ServerHandshake;
+
 import com.data.synchronisation.springboot.service.OrderBookService;
-import com.data.synchronisation.springboot.websocket.orderBook.client.core.PingAwareWebSocketClient;
 import com.data.synchronisation.springboot.websocket.orderBook.config.DepthUpdateDTO;
 import com.data.synchronisation.springboot.websocket.orderBook.dto.BinanceOrderBook;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,32 +16,66 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class BinanceWebSocketClient // extends PingAwareWebSocketClient 
-{
-
+public class TestWebSocket extends WebSocketClient {
     private final OrderBookService orderBookService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private StringBuilder messageBuffer = new StringBuilder();
-
-    public BinanceWebSocketClient(OrderBookService orderBookService) throws URISyntaxException {
-      //  super(new URI("wss://stream.binance.com:9443/ws/btcusdt@depth"), new Draft_6455());
-        this.orderBookService = orderBookService;
-     //   this.setConnectionLostTimeout(60); // optional: detects dead connection
-    }
-
-  //  @Override
-    public void onOpen(ServerHandshake handshake) {
-    	System.out.println("✅ Connected to Binance Order Book WebSocket");
-    }
     
-  //  @Override
+    
+    public TestWebSocket(OrderBookService orderBookService) throws URISyntaxException {
+        super(new URI("wss://stream.binance.com:9443/ws/btcusdt@depth"));
+        this.orderBookService = orderBookService;
+        // Use a lower timeout if needed, e.g. 30 seconds
+        this.setConnectionLostTimeout(30);
+    }
+
+    @Override
+    public void onOpen(ServerHandshake handshake) {
+        System.out.println("✅ Connected to Binance Order Book WebSocket");
+    }
+
+    @Override
     public void onMessage(String message) {
         messageBuffer.append(message);
         processFullMessage(messageBuffer.toString());
         messageBuffer.setLength(0);
     }
 
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        System.out.println("❌ WebSocket Closed: " + reason + " (code: " + code + ")");
+    }
+
+    @Override
+    public void onError(Exception ex) {
+        ex.printStackTrace();
+    }
+    
+    
+ // Optionally, override the pong handler to log when pong frames are received.
+    @Override
+    public void onWebsocketPong(WebSocket conn, Framedata f) {
+        System.out.println("📡 Received PONG: " + f);
+    }
+    
+    private List<BinanceOrderBook> parseOrders(JsonNode ordersNode, int limit) {
+        List<BinanceOrderBook> orders = new ArrayList<>();
+
+        if (ordersNode == null || ordersNode.isEmpty()) {
+            System.out.println("⚠️ Warning: Received empty orders.");
+            return orders; // Return empty list to prevent errors
+        }
+
+        for (int i = 0; i < Math.min(limit, ordersNode.size()); i++) {
+            BigDecimal price = new BigDecimal(ordersNode.get(i).get(0).asText());
+            BigDecimal quantity = new BigDecimal(ordersNode.get(i).get(1).asText());
+            orders.add(new BinanceOrderBook(price, quantity));
+        }
+        return orders;
+    }
+    
+    
+    
     private void processFullMessage(String fullMessage) {
         try {
             System.out.println("📥 Received Order Book Update: " + fullMessage);
@@ -77,31 +112,7 @@ public class BinanceWebSocketClient // extends PingAwareWebSocketClient
             e.printStackTrace();
         }
     }
-/*
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        System.out.println("❌ WebSocket Closed: " + reason + " (code: " + code + ")");
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        System.err.println("⚠️ WebSocket Error:");
-        ex.printStackTrace();
-    }
-*/
-    private List<BinanceOrderBook> parseOrders(JsonNode ordersNode, int limit) {
-        List<BinanceOrderBook> orders = new ArrayList<>();
-
-        if (ordersNode == null || ordersNode.isEmpty()) {
-            System.out.println("⚠️ Warning: Received empty orders.");
-            return orders; // Return empty list to prevent errors
-        }
-
-        for (int i = 0; i < Math.min(limit, ordersNode.size()); i++) {
-            BigDecimal price = new BigDecimal(ordersNode.get(i).get(0).asText());
-            BigDecimal quantity = new BigDecimal(ordersNode.get(i).get(1).asText());
-            orders.add(new BinanceOrderBook(price, quantity));
-        }
-        return orders;
-    }
+    
+    
+    
 }

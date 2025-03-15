@@ -133,7 +133,7 @@ public class ScheduledTasks {
 	
 
     
-	@Scheduled(fixedRate = 200000)  // 20000   300000
+	 @Scheduled(fixedRate = 200000)  // 20000   300000
 	public void syncHistoricalTradeEnaInfo() {
 		log.info("syncTradeInfo The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
