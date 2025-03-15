@@ -48,7 +48,7 @@ var originalXAxisOptions = {
   },
   axisTicks: { show: false },
   axisBorder: { show: true },
-  tooltip: { enabled: false },
+  tooltip: { enabled: true },
   stepSize :10,
 };
 
@@ -87,7 +87,7 @@ var originalChartSettings = {
     type: 'x'
   },
   toolbar: {
-    show: true,
+    show: false,
     autoSelected: 'pan',
     offsetX: 0,
     offsetY: 0,
@@ -689,15 +689,26 @@ function fetchMoreCandlestickData(xaxis) {
 			let data2 = response.dataVolume.data;
 			let volumeData = [];
 			let volumeColors = []; // ✅ Array to hold bar colors
-			let totalDataPoints =  allData.length;
-			let dynamicRange= totalDataPoints - oldData;
-    		let min = dynamicRange - windowSize <0 ? 0 : dynamicRange - windowSize ;
-    		let max = dynamicRange;
-			originalXAxisOptions.min=min;
-			originalXAxisOptions.max=max;
 			
-  		   let newYLimits = calculateYLimitsCandleSticks(allData, min, max,10);
-      		originalYAxisOptions.min = newYLimits.min;
+			let totalDataPoints = allData.length;
+			let rangeMin = xaxis.min;
+			let rangeMax = xaxis.max;
+			
+			// Make sure we stay within bounds
+			rangeMin = Math.max(0, rangeMin);
+			rangeMax = Math.min(totalDataPoints, rangeMax);
+			
+			// Fallback if invalid range
+			if (rangeMax <= rangeMin) {
+			  rangeMin = Math.max(0, totalDataPoints - windowSize);
+			  rangeMax = totalDataPoints;
+			}
+			
+			originalXAxisOptions.min = rangeMin;
+			originalXAxisOptions.max = rangeMax;
+			
+			let newYLimits = calculateYLimitsCandleSticks(allData, rangeMin, rangeMax, 10);
+			originalYAxisOptions.min = newYLimits.min;
 			originalYAxisOptions.max = newYLimits.max;
 			
 
