@@ -81,6 +81,7 @@ import com.data.synchronisation.springboot.repositories.SagaRepository;
 import com.data.synchronisation.springboot.repositories.WInfoRepository;
 import com.data.synchronisation.springboot.repositories.WRepository;
 import com.data.synchronisation.springboot.repositories.WTradeInfoRepository;
+import com.data.synchronisation.springboot.util.CurrencyTableMapper;
 
 @Service
 public class CryptoAnalyseService {
@@ -156,7 +157,7 @@ public class CryptoAnalyseService {
 		this.btcTradeHistoryInfoRepository   = btcTradeHistoryInfoRepository;
 	}
 	
-	
+    
 	/*
 	 @Transactional
 	    public boolean insertIntoTable(DataDTO dataDTO) {
@@ -763,8 +764,9 @@ public class CryptoAnalyseService {
 
     public GraphGeneralResponseDTO getCandleStickData(GraphDataReqDTO req)
     {
-        String tableName = req.getCryptoCurrencyCode().equalsIgnoreCase("BTC") ? "cr_btc_high_low" : null;
- 	    int pageSize = req.getSize();
+        String tableName = CurrencyTableMapper.getTableName( req.getCryptoCurrencyCode());
+
+        int pageSize = req.getSize();
  	    int pageNumber = req.getPage();
 
  	    // === First Query: Candle Data ===
@@ -803,7 +805,7 @@ public class CryptoAnalyseService {
     
     public GraphGeneralResponseDTO getVolumeData(GraphDataReqDTO req)
     {
-        String tableName = req.getCryptoCurrencyCode().equalsIgnoreCase("BTC") ? "cr_btc_high_low" : null;
+        String tableName = CurrencyTableMapper.getTableName( req.getCryptoCurrencyCode());
  	    int pageSize = req.getSize();
  	    int pageNumber = req.getPage();
 
