@@ -27,7 +27,7 @@ public class OrderBookService {
 	 
 	 
 	 public void saveOrderBookLst(List<CRBTCOrderBook> binanceOrderBookLst) {
-		 
+		 System.out.println("saving Orders");
 		 btcOrderBookRepository.saveAll(binanceOrderBookLst);
 	     
 	 }
