@@ -22,4 +22,5 @@ public class GraphDataReqDTO {
     private int minutes;   // used for order book
     private int page;
     private int size;
+    private int limit;
 }

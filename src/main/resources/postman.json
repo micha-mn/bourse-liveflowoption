@@ -6,3 +6,12 @@ curl --location --request GET 'https://localhost:9091/get-order-book' \
 }
 
 -- ------------------
+
+curl --location --request GET 'https://localhost:9091/get-order-book-by-action' \
+--header 'Content-Type: application/json' \
+--data '{
+    "limit":"17"
+}
+
+
+'

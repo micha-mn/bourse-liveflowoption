@@ -51,6 +51,7 @@ import com.data.synchronisation.springboot.dto.GraphFulllResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphGeneralResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphResponseProjection;
+import com.data.synchronisation.springboot.dto.OrderBookResponseDTO;
 import com.data.synchronisation.springboot.dto.PriceCryptoRespDTO;
 import com.data.synchronisation.springboot.dto.Resistant;
 import com.data.synchronisation.springboot.dto.SupResDTO;
@@ -746,12 +747,7 @@ public class CryptoAnalyseService {
 	}
 	
 	
-      public List<GraphResponseProjection>  getOrderBook(@RequestBody GraphDataReqDTO req) {
-		
-		List<GraphResponseProjection> orderBookResponse = orderBookService.getOrderBookData(req);
-		
-	   return orderBookResponse; 
-	}
+     
       public GraphFulllResponseDTO getCandleGraphData(@RequestBody GraphDataReqDTO req) {
 
     	   GraphGeneralResponseDTO candleResponse = getCandleStickData(req);

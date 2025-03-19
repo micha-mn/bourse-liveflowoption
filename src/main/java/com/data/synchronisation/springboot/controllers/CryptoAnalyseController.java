@@ -29,6 +29,7 @@ import com.data.synchronisation.springboot.dto.GraphFulllResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphGeneralResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphResponseProjection;
+import com.data.synchronisation.springboot.dto.OrderBookResponseDTO;
 import com.data.synchronisation.springboot.dto.SupportResistantPointsDTO;
 import com.data.synchronisation.springboot.dto.TradeHistoryResDTO;
 import com.data.synchronisation.springboot.dto.TradeReqDTO;
@@ -101,14 +102,6 @@ public class CryptoAnalyseController {
 		  req.setToDate("2025-02-21 21:36:04");
 		 return cryptoAnalyseService.getGraphData(req);
 	}
-	
-	//GraphGeneralResponseDTO
-	@GetMapping(value = "/get-order-book")
-	public List<GraphResponseProjection> getOrderBook(@RequestBody GraphDataReqDTO req) {
-		// return null;
-		 return cryptoAnalyseService.getOrderBook(req);
-	}
-	
 	
 	// to get candle
 	@PostMapping(value = "getCandleGraphData")

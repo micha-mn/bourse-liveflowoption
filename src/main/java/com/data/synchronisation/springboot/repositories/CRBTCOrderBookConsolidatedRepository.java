@@ -11,6 +11,7 @@ import com.data.synchronisation.springboot.domain.entity.CRBTCOrderBook;
 import com.data.synchronisation.springboot.domain.entity.CRBTCOrderBookConsolidated;
 import com.data.synchronisation.springboot.dto.GraphResponseDTO;
 import com.data.synchronisation.springboot.dto.GraphResponseProjection;
+import com.data.synchronisation.springboot.dto.OrderBookByActionObjectProjection;
 @Repository
 public interface CRBTCOrderBookConsolidatedRepository extends JpaRepository<CRBTCOrderBookConsolidated, Long> {
 	
@@ -58,6 +59,16 @@ public interface CRBTCOrderBookConsolidatedRepository extends JpaRepository<CRBT
 			+ "    action", 
     nativeQuery = true)
 	 List<GraphResponseProjection> getOrderBookConsolidatedMinutePeriod(@Param("period") String period);
+	
+	
+	
+	@Query(value = "select quantity as volume,price \r\n"
+			+ "      FROM cr_order_book_consolidated \r\n"
+			+ "      where action = :action\r\n"
+			+ "	order by refer_date desc\r\n"
+			+ "    limit :limit", 
+    nativeQuery = true)
+	 List<OrderBookByActionObjectProjection> getOrderBookByAction(@Param("limit") int limit,@Param("action")  String action);
 	  
 	  
 }

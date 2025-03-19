@@ -42,4 +42,5 @@ public class Btc {
     private String value;
 	@Column(name = "REFER_DATE")
     private LocalDateTime referDate;
+	
 }
