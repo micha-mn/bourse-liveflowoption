@@ -1,7 +1,39 @@
-curl --location --request GET 'https://localhost:9091/get-order-book' \
+curl --location --request GET 'https://localhost:9091/order-book/get-order-book-percentage' \
 --header 'Content-Type: application/json' \
 --data '{
-    "minutes":100
+    "period":"1",
+    "hmd":"MINUTE"
+}'
+---------------------------------------------------------------
+curl --location --request GET 'https://localhost:9091/order-book/get-order-book-bid-ask' \
+--header 'Content-Type: application/json' \
+--data '{
+    "limit":"17"
 }
 
----------------------------------------------------------------
+
+'
+
+
+
+
+--------------------------------------
+curl --location --request GET 'https://localhost:9091/order-book/get-order-book-data' \
+--header 'Content-Type: application/json' \
+--data '{
+
+    
+    
+    "cryptoCurrencyCode":"btc",
+
+    
+    "limit":"2",
+
+    
+     "period":"1",
+    "hmd":"MINUTE"
+
+}
+
+
+'
