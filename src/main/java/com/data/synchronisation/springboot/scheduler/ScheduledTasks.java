@@ -80,7 +80,7 @@ public class ScheduledTasks {
 	
 	
 	
-	// @Scheduled(fixedRate = 20000 ) // 20000   300000
+	@Scheduled(fixedRate = 20000 ) // 20000   300000
 	public void syncLiveCurrencyPriceANdCalculateMinMax() {
 		log.info("The time is now {} started {}", dateFormat.format(new Date()), new Date());
 		
@@ -427,7 +427,7 @@ public class ScheduledTasks {
 	    // each 1 minute get market cap
 	    //get candles and save it 
 	    @Scheduled(cron = "0 0/1 * * * ?")
-		public void schedule1MinuteIntervals() {
+		public void scheduleCandleIntervals() {
 
 			// Calculate the current interval's start and end times
 	    	
@@ -450,6 +450,9 @@ public class ScheduledTasks {
 		}
 	    
 
+	    
+	    
+	    // specific for charbel
       @Scheduled(cron = "0 5 0 * * ?")// Runs at 00:05 AM every day
 	   public void runDailyCryptoTask() {
 	        System.out.println("Scheduled task running at 00:05 AM...");
