@@ -15,6 +15,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TestWebSocket extends WebSocketClient {
     private final OrderBookService orderBookService;
@@ -44,6 +46,20 @@ public class TestWebSocket extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println("❌ WebSocket Closed: " + reason + " (code: " + code + ")");
+        
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("🔄 Attempting to reconnect...");
+                    reconnect(); // Provided by WebSocketClient
+                } catch (Exception e) {
+                    System.err.println("❌ Error during reconnect: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }, 5000); // delay in milliseconds
+        
     }
 
     @Override
