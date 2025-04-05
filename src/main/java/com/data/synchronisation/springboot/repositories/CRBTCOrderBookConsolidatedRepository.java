@@ -65,10 +65,19 @@ public interface CRBTCOrderBookConsolidatedRepository extends JpaRepository<CRBT
 	@Query(value = "select quantity as volume,price \r\n"
 			+ "      FROM cr_order_book_consolidated \r\n"
 			+ "      where action = :action\r\n"
-			+ "	order by refer_date desc\r\n"
+			+ "	order by refer_date desc,  price DESC \r\n"
 			+ "    limit :limit", 
     nativeQuery = true)
-	 List<OrderBookByActionObjectProjection> getOrderBookByAction(@Param("limit") int limit,@Param("action")  String action);
+	 List<OrderBookByActionObjectProjection> getOrderBookByActionDesc(@Param("limit") int limit,@Param("action")  String action);
 	  
+
+	@Query(value = "select quantity as volume,price \r\n"
+			+ "      FROM cr_order_book_consolidated \r\n"
+			+ "      where action = :action\r\n"
+			+ "	order by refer_date desc,  price Asc \r\n"
+			+ "    limit :limit", 
+    nativeQuery = true)
+	 List<OrderBookByActionObjectProjection> getOrderBookByActionAsc(@Param("limit") int limit,@Param("action")  String action);
 	  
+	 
 }

@@ -53,8 +53,8 @@ public class OrderBookService {
      
      public OrderBookResponseDTO getOrderBookByBidAsk(GraphDataReqDTO req) {
      	
-    	 List<OrderBookByActionObjectProjection>  orderBookLstBuy = crBTCOrderBookConsolidatedRepository.getOrderBookByAction(req.getLimit(), "buy");
-    	 List<OrderBookByActionObjectProjection>  orderBookLstSell = crBTCOrderBookConsolidatedRepository.getOrderBookByAction(req.getLimit(), "sell");
+    	 List<OrderBookByActionObjectProjection>  orderBookLstBuy = crBTCOrderBookConsolidatedRepository.getOrderBookByActionDesc(req.getLimit(), "buy");
+    	 List<OrderBookByActionObjectProjection>  orderBookLstSell = crBTCOrderBookConsolidatedRepository.getOrderBookByActionAsc(req.getLimit(), "sell");
     	 
     	 OrderBookResponseDTO resp = OrderBookResponseDTO.builder()
     			 .ask(orderBookLstBuy)
@@ -70,8 +70,8 @@ public class OrderBookService {
     	 
     	 if(req.getCryptoCurrencyCode().equalsIgnoreCase("btc"))
     	 {
-	    	 List<OrderBookByActionObjectProjection>  orderBookLstBuy = crBTCOrderBookConsolidatedRepository.getOrderBookByAction(req.getLimit(), "buy");
-	    	 List<OrderBookByActionObjectProjection>  orderBookLstSell = crBTCOrderBookConsolidatedRepository.getOrderBookByAction(req.getLimit(), "sell");
+	    	 List<OrderBookByActionObjectProjection>  orderBookLstBuy = crBTCOrderBookConsolidatedRepository.getOrderBookByActionDesc(req.getLimit(), "buy");
+	    	 List<OrderBookByActionObjectProjection>  orderBookLstSell = crBTCOrderBookConsolidatedRepository.getOrderBookByActionAsc(req.getLimit(), "sell");
 	    	
 	    	 List<GraphResponseProjection> orderBookPercentage = getOrderBookPercentage(req) ;
 	    	 
